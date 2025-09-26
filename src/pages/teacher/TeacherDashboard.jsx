@@ -15,10 +15,12 @@ export default function TeacherDashboard() {
   const [overview, setOverview] = useState({});
   const [studentsPerSubject, setStudentsPerSubject] = useState([]);
   const [upcomingExams, setUpcomingExams] = useState([]);
+  const [loading, setLoading] = useState(true); // 🔹 loader state
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const res = await api.get("/teachers/overview");
         const data = res.data;
         setOverview(data.overview || {});
@@ -26,10 +28,21 @@ export default function TeacherDashboard() {
         setUpcomingExams(data.upcomingExams || []);
       } catch (err) {
         console.error("Error fetching teacher overview", err);
+      } finally {
+        setLoading(false); // 🔹 hide loader
       }
     };
     fetchData();
   }, []);
+
+  // 🔹 Loader (same style as StudentDashboard)
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[70vh]">
+        <div className="loader border-4 border-green-400 border-t-transparent rounded-full w-12 h-12 animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 space-y-8">
@@ -40,12 +53,20 @@ export default function TeacherDashboard() {
           { title: "Students", value: overview.totalStudents },
           { title: "Assignments Given", value: overview.assignments },
           { title: "Assignments Submitted", value: overview.submittedAssignments },
-          { title: "Attendance Today", value: `${overview.attendancePresent || 0}/${overview.attendanceTotal || 0}` },
+          {
+            title: "Attendance Today",
+            value: `${overview.attendancePresent || 0}/${overview.attendanceTotal || 0}`,
+          },
         ].map((item, idx) => (
-          <Card key={idx} className="shadow-md rounded-2xl hover:shadow-lg transition">
+          <Card
+            key={idx}
+            className="shadow-md rounded-2xl hover:shadow-lg transition"
+          >
             <CardContent className="p-4 text-center">
               <h3 className="text-lg font-semibold">{item.title}</h3>
-              <p className="text-2xl font-bold text-green-600">{item.value || 0}</p>
+              <p className="text-2xl font-bold text-green-600">
+                {item.value || 0}
+              </p>
             </CardContent>
           </Card>
         ))}
@@ -77,9 +98,14 @@ export default function TeacherDashboard() {
           {(overview.recentAssignments || []).length > 0 ? (
             <ul className="space-y-2">
               {overview.recentAssignments.map((a) => (
-                <li key={a._id} className="border p-2 rounded-lg flex justify-between hover:bg-gray-50">
+                <li
+                  key={a._id}
+                  className="border p-2 rounded-lg flex justify-between hover:bg-gray-50"
+                >
                   <span>{a.title}</span>
-                  <span className="text-sm text-gray-500">{new Date(a.deadline).toLocaleDateString()}</span>
+                  <span className="text-sm text-gray-500">
+                    {new Date(a.deadline).toLocaleDateString()}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -94,9 +120,14 @@ export default function TeacherDashboard() {
           {upcomingExams.length > 0 ? (
             <ul className="space-y-2">
               {upcomingExams.map((exam) => (
-                <li key={exam._id} className="border p-2 rounded-lg flex justify-between hover:bg-gray-50">
+                <li
+                  key={exam._id}
+                  className="border p-2 rounded-lg flex justify-between hover:bg-gray-50"
+                >
                   <span>{exam.name}</span>
-                  <span className="text-sm text-gray-500">{new Date(exam.date).toLocaleDateString()}</span>
+                  <span className="text-sm text-gray-500">
+                    {new Date(exam.date).toLocaleDateString()}
+                  </span>
                 </li>
               ))}
             </ul>
