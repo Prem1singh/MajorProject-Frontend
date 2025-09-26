@@ -3,7 +3,7 @@ import store from "../redux/store";
 import { loginSuccess, logout } from "../redux/slice/userSlice";
 
 const api = axios.create({
-  baseURL: "https://minor-project-backend-six.vercel.app/api",
+  baseURL: "https://major-project-backend-roan.vercel.app/api",
 });
 
 // Add access token to headers
