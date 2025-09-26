@@ -1,0 +1,111 @@
+import React, { useEffect, useState } from "react";
+import api from "../../../utils/axiosInstance";
+
+export default function ManageTeachers() {
+  const [departments, setDepartments] = useState([]);
+  const [selectedDept, setSelectedDept] = useState("");
+  const [teachers, setTeachers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  // Fetch departments for dropdown
+  useEffect(() => {
+    api
+      .get("/admin/departments")
+      .then((res) => setDepartments(res.data))
+      .catch(() => setError("Failed to fetch departments"));
+  }, []);
+
+  // Fetch teachers whenever department changes
+  useEffect(() => {
+    if (!selectedDept) {
+      setTeachers([]);
+      return;
+    }
+    fetchTeachers(selectedDept);
+  }, [selectedDept]);
+
+  const fetchTeachers = async (deptId) => {
+    setLoading(true);
+    try {
+      const res = await api.get(`/access/admin/teachers/${deptId}`);
+      setTeachers(res.data.teachers || []);
+    } catch (err) {
+      setError("Failed to fetch teachers.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="p-4 sm:p-6 bg-white rounded-xl shadow-md space-y-6">
+      <h2 className="text-2xl font-bold text-gray-800">Manage Teachers</h2>
+
+      {/* Department Select */}
+      <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
+        <label className="block text-gray-700 font-medium mb-2">
+          Select Department
+        </label>
+        <select
+          value={selectedDept}
+          onChange={(e) => setSelectedDept(e.target.value)}
+          className="w-full sm:w-72 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+        >
+          <option value="">-- Choose Department --</option>
+          {departments.map((d) => (
+            <option key={d._id} value={d._id}>
+              {d.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <p className="text-red-600 mb-4 font-medium bg-red-50 p-2 rounded-lg text-center">
+          {error}
+        </p>
+      )}
+
+      {/* Teachers Table */}
+      <div className="overflow-x-auto">
+        {loading ? (
+          <p className="text-gray-600 text-center py-4">Loading teachers...</p>
+        ) : teachers.length === 0 ? (
+          <p className="text-gray-500 italic text-center py-4">
+            No teachers found for this department.
+          </p>
+        ) : (
+          <table className="w-full min-w-[500px] border rounded-lg shadow-md overflow-hidden">
+            <thead className="bg-blue-600 text-white">
+              <tr>
+                <th className="px-4 py-3 text-left">Name</th>
+                <th className="px-4 py-3 text-left">Email</th>
+                <th className="px-4 py-3 text-left">Employee ID</th>
+                <th className="px-4 py-3 text-left">Subjects</th>
+              </tr>
+            </thead>
+            <tbody>
+              {teachers.map((teacher, idx) => (
+                <tr
+                  key={teacher._id}
+                  className={`${
+                    idx % 2 === 0 ? "bg-gray-50" : "bg-white"
+                  } hover:bg-blue-50 transition`}
+                >
+                  <td className="px-4 py-3">{teacher.name}</td>
+                  <td className="px-4 py-3">{teacher.email}</td>
+                  <td className="px-4 py-3">{teacher.employeeId || "N/A"}</td>
+                  <td className="px-4 py-3">
+                    {(teacher.subjects || []).map((s) => s.name).join(", ") ||
+                      "No subjects"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}

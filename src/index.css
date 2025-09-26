@@ -1,0 +1,6 @@
+@import "tailwindcss";
+.loginPage{
+    background-image: url('https://imgs.search.brave.com/HzdxV8SaKiTOpAYR8WNzmvf3kcFLhdsBNXp_8nnvZ2A/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9ha20t/aW1nLWEtaW4udG9z/c2h1Yi5jb20vc2l0/ZXMvcmVzb3VyY2Vz/L2NhbXB1cy9wcm9k/Ly9pbWcvdmlkZW9z/LzIwMjMvOC9zY3Jl/ZW5zaG90LTIwMjMw/OTA4LTE3MjAzNTM3/NzU0MzYwMTA5NC5w/bmc') !important;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }

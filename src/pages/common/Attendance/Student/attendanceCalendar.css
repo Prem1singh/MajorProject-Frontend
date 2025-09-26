@@ -1,0 +1,17 @@
+/* Highlight present dates as green */
+.present-day {
+    background: #86efac !important; /* Tailwind green-300 */
+    border-radius: 50% !important;
+    color: #166534 !important; /* green-800 */
+    font-weight: bold;
+  }
+  
+  /* Highlight absent dates as red */
+  .absent-day {
+    background: #fca5a5 !important; /* Tailwind red-300 */
+    border-radius: 50% !important;
+    color: #7f1d1d !important; /* red-800 */
+    font-weight: bold;
+  }
+
+  
