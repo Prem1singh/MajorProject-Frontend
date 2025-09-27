@@ -113,9 +113,10 @@ export default function CreateAssignment() {
             </option>
           ))}
         </select>
-
+          <label htmlFor="deadline">Deadline</label>
         <input
           type="date"
+          id="deadline"
           value={deadline}
           onChange={(e) => setDeadline(e.target.value)}
           className="border rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"

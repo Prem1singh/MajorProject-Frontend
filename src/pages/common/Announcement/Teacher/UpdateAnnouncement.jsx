@@ -15,7 +15,7 @@ export default function UpdateAnnouncement() {
     const fetchSubjects = async () => {
       try {
         const res = await api.get("/teachers/subjects");
-        console.log(res.data)
+
         setSubjects(res.data.subjects || []);
       } catch (err) {
         console.error("Error fetching subjects", err);

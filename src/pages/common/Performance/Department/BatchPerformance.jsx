@@ -40,7 +40,7 @@ export default function BatchPerformance() {
     if (!selectedBatch) return;
     const fetchSubjects = async () => {
       try {
-        const res = await api.get(`/departmentAdmin/subjects?batch=${selectedBatch}`);
+        const res = await api.get(`/departmentAdmin/subjects/batch?batch=${selectedBatch}`);
         setSubjects(res.data);
         setSelectedSubject("");
         setPerformance(null);

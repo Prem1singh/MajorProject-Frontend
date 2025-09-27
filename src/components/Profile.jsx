@@ -6,7 +6,7 @@ import { updateProfile } from "../redux/slice/userSlice";
 export default function ProfileTab() {
   const user = useSelector((state) => state.user.data);
   const dispatch = useDispatch();
-  console.log(user)
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",

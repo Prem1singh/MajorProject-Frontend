@@ -135,27 +135,7 @@ export default function StudentDashboard() {
         </Card>
       </div>
 
-      {/* Upcoming Exams */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="shadow-md rounded-2xl p-4">
-          <h3 className="text-lg font-semibold mb-4">Upcoming Exams</h3>
-          {upcomingExams.length > 0 ? (
-            <ul className="space-y-2">
-              {upcomingExams.map((exam) => (
-                <li
-                  key={exam._id}
-                  className="border p-2 rounded-lg flex justify-between items-center hover:bg-gray-50"
-                >
-                  <span>{exam.name}</span>
-                  <span className="text-sm text-gray-500">{exam.date}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-gray-500 text-center">No upcoming exams</p>
-          )}
-        </Card>
-      </div>
+   
     </div>
   );
 }

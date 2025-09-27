@@ -27,9 +27,10 @@ export default function DepartmentMarksViewer() {
     if (!selectedBatch) return;
     const fetchData = async () => {
       const [studentsRes, subjectsRes] = await Promise.all([
-        api.get(`/departmentAdmin/students?batch=${selectedBatch}`),
-        api.get(`/departmentAdmin/subjects?batch=${selectedBatch}`)
+        api.get(`/departmentAdmin/students/batch?batch=${selectedBatch}`),
+        api.get(`/departmentAdmin/subjects/batch?batch=${selectedBatch}`)
       ]);
+
       setStudents(studentsRes.data);
       setSubjects(subjectsRes.data);
       setSelectedStudent("");
