@@ -32,8 +32,10 @@ import AddSubject from './pages/department/Subject/Subject'
 import Exams from './pages/department/Exams/Exams'
 import StudyMaterial from './pages/common/StudyMaterial/StudyMaterial';
 import DepartmentMarksViewer from './pages/department/Marks/DepartmentMarksViewer';
-import StudentDoubtForum from './pages/student/StudentDoubtForum';
+import StudentDoubtForum from './pages/common/StudyMaterial/Student/StudentDoubtForum';
 
+import AdminPlacements from './pages/department/Placement/Placements';
+import StudentPlacements from './pages/student/Placements';
 
 export default function App() {
 
@@ -69,7 +71,7 @@ const routes=createBrowserRouter(
         { path: "/department/courses", element: <Courses /> },
         { path: "/department/batches", element: <Batches /> },
         { path: "/department/exams", element: <Exams /> },
-        { path: "/department/marks", element: <DepartmentMarksViewer /> },
+        { path: "/department/marks", element: <DepartmentMarksViewer /> },{ path: "/department/placement", element: <AdminPlacements /> },
 
 
         // 🔹 Student Routes
@@ -79,7 +81,8 @@ const routes=createBrowserRouter(
         { path: "student/marks", element: <Marks /> },
         { path: "student/Announcement", element: <Announcement /> },
         { path: "student/study", element: <StudyMaterial /> },
-        { path: "student/doubt", element: <StudentDoubtForum /> }
+        { path: "student/doubt", element: <StudentDoubtForum /> },
+        { path: "student/placement", element: <StudentPlacements /> }
 
 
 

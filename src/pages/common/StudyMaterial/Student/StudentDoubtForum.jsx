@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import api from "../../utils/axiosInstance";
+import api from "../../../../utils/axiosInstance";
 
 export default function StudentDoubtForum() {
   const [doubts, setDoubts] = useState([]);

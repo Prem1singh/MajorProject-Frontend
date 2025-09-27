@@ -30,6 +30,8 @@ export default function Aside({ closeSidebar }) {
       { name: "Batches", path: "/department/batches" },
       { name: "Exams", path: "/department/exams" },
       { name: "Marks", path: "/department/marks" },
+      { name: "Placement", path: "/department/placement" },
+
 
     ],
     Student: [
@@ -40,6 +42,7 @@ export default function Aside({ closeSidebar }) {
       { name: "Announcement", path: "/student/announcement" },
       { name: "Study Material", path: "/student/study" },
       { name: "Doubts", path: "/student/doubt" },
+      { name: "Placement", path: "/student/placement" },
 
     ],
   };
