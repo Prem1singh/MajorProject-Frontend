@@ -161,8 +161,17 @@ export default function DepartmentMarksViewer() {
         </div>
       )}
 
-      {/* Search Input */}
-      {marks.length > 0 && (
+    
+
+      {/* Fetch Button */}
+      <button
+        onClick={fetchMarks}
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+      >
+        {loading ? "Fetching..." : "Get Marks"}
+      </button>
+  {/* Search Input */}
+  {marks.length > 0 && (
         <input
           type="text"
           placeholder={`Search by ${viewBy === "student" ? "subject" : "student"} name...`}
@@ -174,15 +183,6 @@ export default function DepartmentMarksViewer() {
           className="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-400 mt-4"
         />
       )}
-
-      {/* Fetch Button */}
-      <button
-        onClick={fetchMarks}
-        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-      >
-        {loading ? "Fetching..." : "Get Marks"}
-      </button>
-
     {/* Marks Table */}
 {currentMarks.length > 0 && (
   <div className="mt-6 overflow-x-auto">
