@@ -17,6 +17,9 @@ export default function Aside({ closeSidebar }) {
       { name: "Assignments", path: "/teacher/assignments" },
       { name: "Attendance", path: "/teacher/attendance" },
       { name: "Marks", path: "/teacher/marks" },
+      { name: "Announcement", path: "/teacher/announcement" },
+      { name: "Study Material", path: "/teacher/study" },
+
     ],
     DepartmentAdmin: [
       { name: "Dashboard", path: "/department/dashboard" },
@@ -26,12 +29,18 @@ export default function Aside({ closeSidebar }) {
       { name: "Courses", path: "/department/courses" },
       { name: "Batches", path: "/department/batches" },
       { name: "Exams", path: "/department/exams" },
+      { name: "Marks", path: "/department/marks" },
+
     ],
     Student: [
       { name: "Dashboard", path: "/student/dashboard" },
       { name: "My Assignments", path: "/student/assignments" },
       { name: "Attendance", path: "/student/attendance" },
       { name: "Marks", path: "/student/marks" },
+      { name: "Announcement", path: "/student/announcement" },
+      { name: "Study Material", path: "/student/study" },
+      { name: "Doubts", path: "/student/doubt" },
+
     ],
   };
 

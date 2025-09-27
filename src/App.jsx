@@ -19,7 +19,7 @@ import StudentDashboard from "./pages/student/StudentDashboard";
 import Assignments from "./pages/common/Assignments/Assignments";
 import Attendance from "./pages/common/Attendance/Attendance";
 import Marks from './pages/common/Marks/Marks'
-import Notifications from "./pages/common/Notifications";
+import Announcement from "./pages/common/Announcement/Announcement";
 import Profile from './components/Profile'
 import ManageUsers from './pages/admin/ManageUser/ManageUsers'
 import ManageDepartments from './pages/admin/ManageDepartment/ManageDepartments'
@@ -30,6 +30,9 @@ import Courses from './pages/department/Courses/Courses'
 import Batches from './pages/department/Batches/Batches'
 import AddSubject from './pages/department/Subject/Subject'
 import Exams from './pages/department/Exams/Exams'
+import StudyMaterial from './pages/common/StudyMaterial/StudyMaterial';
+import DepartmentMarksViewer from './pages/department/Marks/DepartmentMarksViewer';
+import StudentDoubtForum from './pages/student/StudentDoubtForum';
 
 
 export default function App() {
@@ -55,7 +58,8 @@ const routes=createBrowserRouter(
         { path: "teacher/assignments", element: <Assignments /> },
         { path: "teacher/attendance", element: <Attendance /> },
         { path: "teacher/marks", element: <Marks /> },
-        { path: "teacher/notifications", element: <Notifications /> },
+        { path: "teacher/Announcement", element: <Announcement /> },
+        { path: "teacher/study", element: <StudyMaterial /> },
   
         // 🔹 Department Admin Routes
         { path: "department/dashboard", element: <DepartmentAdminDashboard /> }, 
@@ -65,13 +69,17 @@ const routes=createBrowserRouter(
         { path: "/department/courses", element: <Courses /> },
         { path: "/department/batches", element: <Batches /> },
         { path: "/department/exams", element: <Exams /> },
+        { path: "/department/marks", element: <DepartmentMarksViewer /> },
+
 
         // 🔹 Student Routes
         { path: "student/dashboard", element: <StudentDashboard /> },
         { path: "student/assignments", element: <Assignments /> },
         { path: "student/attendance", element: <Attendance /> },
         { path: "student/marks", element: <Marks /> },
-        { path: "student/notifications", element: <Notifications /> }
+        { path: "student/Announcement", element: <Announcement /> },
+        { path: "student/study", element: <StudyMaterial /> },
+        { path: "student/doubt", element: <StudentDoubtForum /> }
 
 
 
