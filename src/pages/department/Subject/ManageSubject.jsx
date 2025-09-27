@@ -10,6 +10,11 @@ export default function ManageSubjects() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState("");
+  const [searchTerm, setSearchTerm] = useState(""); // ✅ Search state
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   // Fetch teachers & batches
   const fetchMeta = async () => {
@@ -33,7 +38,13 @@ export default function ManageSubjects() {
       let url = "/departmentAdmin/subjects";
       if (batchId) url += `?batchId=${batchId}`;
       const res = await api.get(url);
-      setSubjects(res.data || []);
+
+      // Sort subjects by code (ascending)
+      const sorted = (res.data || []).sort((a, b) =>
+        (a.code || "").localeCompare(b.code || "")
+      );
+      setSubjects(sorted);
+      setCurrentPage(1); // reset page when filter changes
     } catch (err) {
       console.error(err);
       toast.error("Failed to fetch subjects");
@@ -75,7 +86,10 @@ export default function ManageSubjects() {
     e.preventDefault();
     try {
       setActionLoading(true);
-      await api.put(`/departmentAdmin/subject/${selectedSubject._id}`, selectedSubject);
+      await api.put(
+        `/departmentAdmin/subject/${selectedSubject._id}`,
+        selectedSubject
+      );
       toast.success("Updated Successfully");
       setSelectedSubject(null);
       fetchSubjects(selectedBatch);
@@ -89,11 +103,26 @@ export default function ManageSubjects() {
 
   if (loading) return <p className="text-center py-4">Loading...</p>;
 
+  // ✅ Filter subjects based on searchTerm
+  const filteredSubjects = subjects.filter(
+    (s) =>
+      (s.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (s.code || "").toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredSubjects.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentSubjects = filteredSubjects.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
+
   return (
     <div className="p-4 max-w-6xl mx-auto">
       <h2 className="text-2xl font-semibold mb-4 text-center">Manage Subjects</h2>
 
-      {/* Batch Filter */}
+      {/* Batch Filter + Search */}
       <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-2">
         <label className="font-medium">Filter by Batch:</label>
         <select
@@ -108,6 +137,15 @@ export default function ManageSubjects() {
             </option>
           ))}
         </select>
+
+        {/* ✅ Search Bar */}
+        <input
+          type="text"
+          placeholder="Search by name or code..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="p-2 border rounded w-full sm:w-64"
+        />
       </div>
 
       {/* Subjects Table */}
@@ -126,8 +164,8 @@ export default function ManageSubjects() {
             </tr>
           </thead>
           <tbody>
-            {subjects.length > 0 ? (
-              subjects.map((s) => (
+            {currentSubjects.length > 0 ? (
+              currentSubjects.map((s) => (
                 <tr key={s._id} className="hover:bg-gray-50">
                   <td className="border px-3 py-2">{s.name}</td>
                   <td className="border px-3 py-2">{s.code}</td>
@@ -163,6 +201,29 @@ export default function ManageSubjects() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-4">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            Prev
+          </button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* Edit Subject Form */}
       {selectedSubject && (

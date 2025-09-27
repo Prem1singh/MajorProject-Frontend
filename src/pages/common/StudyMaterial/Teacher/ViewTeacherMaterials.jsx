@@ -11,6 +11,10 @@ export default function ViewTeacherMaterials() {
   const [editDescription, setEditDescription] = useState("");
   const [editFile, setEditFile] = useState(null);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("title"); // or "date"
+  const [sortOrder, setSortOrder] = useState("asc"); // "asc" or "desc"
+
   // Fetch subjects
   useEffect(() => {
     const fetchSubjects = async () => {
@@ -80,28 +84,73 @@ export default function ViewTeacherMaterials() {
     }
   };
 
+  // Filter & sort materials
+  const filteredMaterials = materials
+    .filter(
+      (m) =>
+        m.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        m.description.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      let aValue = sortBy === "title" ? a.title.toLowerCase() : new Date(a.createdAt);
+      let bValue = sortBy === "title" ? b.title.toLowerCase() : new Date(b.createdAt);
+      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold mb-4">View Uploaded Materials</h2>
 
-      <select
-        className="border border-gray-300 rounded-lg p-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        value={selectedSubject}
-        onChange={(e) => setSelectedSubject(e.target.value)}
-      >
-        <option value="all">All Subjects</option>
-        {subjects.map((s) => (
-          <option key={s._id} value={s._id}>{s.name}</option>
-        ))}
-      </select>
+      {/* Controls */}
+      <div className="flex flex-wrap gap-3 mb-4 items-center">
+        <select
+          className="border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          value={selectedSubject}
+          onChange={(e) => setSelectedSubject(e.target.value)}
+        >
+          <option value="all">All Subjects</option>
+          {subjects.map((s) => (
+            <option key={s._id} value={s._id}>{s.name}</option>
+          ))}
+        </select>
 
+        <input
+          type="text"
+          placeholder="Search by title or description"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="border border-gray-300 rounded-lg p-2 flex-1 min-w-[200px]"
+        />
+
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="border border-gray-300 rounded-lg p-2"
+        >
+          <option value="title">Sort by Title</option>
+          <option value="date">Sort by Date</option>
+        </select>
+
+        <select
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value)}
+          className="border border-gray-300 rounded-lg p-2"
+        >
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
+      </div>
+
+      {/* Materials List */}
       {loading ? (
         <p>Loading materials...</p>
-      ) : materials.length === 0 ? (
+      ) : filteredMaterials.length === 0 ? (
         <p className="text-gray-500">No materials found.</p>
       ) : (
         <ul className="space-y-3">
-          {materials.map((m) => (
+          {filteredMaterials.map((m) => (
             <li
               key={m._id}
               className="border border-gray-200 p-4 rounded-lg flex justify-between items-start hover:shadow-lg transition-shadow duration-200"

@@ -10,8 +10,9 @@ export default function StudentAssignmentsView() {
   const [pending, setPending] = useState([]);
   const [submitted, setSubmitted] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [fileMap, setFileMap] = useState({}); // file per assignment
+  const [fileMap, setFileMap] = useState({});
   const [submittingId, setSubmittingId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState(""); // New search state
 
   // Load subjects
   useEffect(() => {
@@ -36,6 +37,7 @@ export default function StudentAssignmentsView() {
         const res = await api.get(`/assignments/submissions/${selectedSubject}`);
         setPending(res.data.pending || []);
         setSubmitted(res.data.submitted || []);
+        setSearchTerm(""); // Reset search when switching subjects
       } catch (err) {
         console.error("Error fetching assignments:", err);
       } finally {
@@ -61,7 +63,7 @@ export default function StudentAssignmentsView() {
       alert("Submitted successfully!");
       setFileMap((prev) => ({ ...prev, [assignmentId]: null }));
 
-      // refresh assignments
+      // Refresh assignments
       const res = await api.get(`/assignments/submissions/${selectedSubject}`);
       setPending(res.data.pending || []);
       setSubmitted(res.data.submitted || []);
@@ -72,6 +74,18 @@ export default function StudentAssignmentsView() {
       setSubmittingId(null);
     }
   };
+
+  // Filter assignments by search term (title or description)
+  const filteredPending = pending.filter(
+    (a) =>
+      a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      a.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  const filteredSubmitted = submitted.filter(
+    (a) =>
+      a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      a.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -92,16 +106,27 @@ export default function StudentAssignmentsView() {
         ))}
       </select>
 
+      {/* Search Box */}
+      {selectedSubject && (
+        <input
+          type="text"
+          placeholder="Search assignments by title or description..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="border p-2 rounded w-full mb-4"
+        />
+      )}
+
       {loading && <p>Loading assignments...</p>}
 
       {!loading && selectedSubject && (
         <>
           {/* Pending Assignments */}
           <h3 className="text-lg font-medium mt-4">📌 Pending Assignments</h3>
-          {pending.length === 0 ? (
+          {filteredPending.length === 0 ? (
             <p className="text-gray-500">No pending assignments 🎉</p>
           ) : (
-            pending
+            filteredPending
               .filter((a) => new Date(a.deadline) >= new Date())
               .map((a) => (
                 <div
@@ -154,10 +179,10 @@ export default function StudentAssignmentsView() {
 
           {/* Submitted Assignments */}
           <h3 className="text-lg font-medium mt-6">✅ Submitted Assignments</h3>
-          {submitted.length === 0 ? (
+          {filteredSubmitted.length === 0 ? (
             <p className="text-gray-500">No submitted assignments yet</p>
           ) : (
-            submitted.map((a) => (
+            filteredSubmitted.map((a) => (
               <div
                 key={a._id}
                 className="bg-green-50 p-4 shadow rounded mb-4 border border-green-300"

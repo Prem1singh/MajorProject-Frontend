@@ -6,6 +6,7 @@ export default function ViewSubmissions() {
   const [submissions, setSubmissions] = useState([]);
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [message, setMessage] = useState(null);
+  const [searchTerm, setSearchTerm] = useState(""); // Search state
 
   // Fetch teacher's assignments
   useEffect(() => {
@@ -26,6 +27,7 @@ export default function ViewSubmissions() {
       const res = await api.get(`/assignments/${id}/submissions`);
       setSubmissions(res.data || []);
       setSelectedAssignment(assignments.find((a) => a._id === id));
+      setSearchTerm(""); // Reset search when switching assignment
     } catch (err) {
       console.error("Error fetching submissions", err);
     }
@@ -111,7 +113,6 @@ export default function ViewSubmissions() {
           </div>
 
           <div className="flex space-x-2 flex-wrap">
-            {/* Pending → Grade or Reject */}
             {(!submission.status || submission.status === "submitted") && (
               <>
                 <button
@@ -136,7 +137,6 @@ export default function ViewSubmissions() {
               </>
             )}
 
-            {/* Graded → Update only */}
             {submission.status === "graded" && (
               <button
                 onClick={() =>
@@ -151,7 +151,6 @@ export default function ViewSubmissions() {
               </button>
             )}
 
-            {/* Rejected → Can grade again */}
             {submission.status === "reject" && (
               <button
                 onClick={() =>
@@ -170,6 +169,16 @@ export default function ViewSubmissions() {
       </div>
     );
   };
+
+  // Filter submissions by search term (name or roll no)
+  const filteredSubmissions = submissions.filter((s) => {
+    const name = s.student?.name || "";
+    const roll = s.student?.rollNo || "";
+    return (
+      name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      roll.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
@@ -222,10 +231,19 @@ export default function ViewSubmissions() {
             <span className="text-blue-600">{selectedAssignment.title}</span>
           </h3>
 
-          {submissions.length > 0 ? (
-            submissions.map((s) => <SubmissionCard key={s._id} submission={s} />)
+          {/* Search Input */}
+          <input
+            type="text"
+            placeholder="Search by student name or roll no"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="border p-2 rounded w-full mb-4"
+          />
+
+          {filteredSubmissions.length > 0 ? (
+            filteredSubmissions.map((s) => <SubmissionCard key={s._id} submission={s} />)
           ) : (
-            <p className="text-gray-500">No submissions yet.</p>
+            <p className="text-gray-500">No submissions match your search.</p>
           )}
         </div>
       )}

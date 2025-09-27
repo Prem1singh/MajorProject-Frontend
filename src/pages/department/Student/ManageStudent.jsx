@@ -5,10 +5,20 @@ import { toast } from "react-toastify";
 export default function ManageStudents() {
   const [students, setStudents] = useState([]);
   const [batches, setBatches] = useState([]);
-  const [loading, setLoading] = useState(true); // for fetching students
-  const [actionLoading, setActionLoading] = useState(false); // for update/delete
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [selectedBatch, setSelectedBatch] = useState("");
+
+  // Pagination
+  const [page, setPage] = useState(1);
+  const studentsPerPage = 10;
+
+  // Sorting
+  const [sortOrder, setSortOrder] = useState("asc");
+
+  // 🔍 Search
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch batches
   const fetchBatches = async () => {
@@ -28,7 +38,20 @@ export default function ManageStudents() {
       let url = "/departmentAdmin/students";
       if (batchId) url += `?batchId=${batchId}`;
       const res = await api.get(url);
-      setStudents(res.data || []);
+
+      let data = res.data || [];
+
+      // ✅ Sort by rollNo
+      data = data.sort((a, b) => {
+        const rollA = a.rollNo || "";
+        const rollB = b.rollNo || "";
+        if (sortOrder === "asc")
+          return rollA.localeCompare(rollB, "en", { numeric: true });
+        return rollB.localeCompare(rollA, "en", { numeric: true });
+      });
+
+      setStudents(data);
+      setPage(1); // reset to first page on new fetch
     } catch (err) {
       console.error(err);
       toast.error("Failed to fetch students");
@@ -41,6 +64,11 @@ export default function ManageStudents() {
     fetchBatches();
     fetchStudents();
   }, []);
+
+  // Refetch when sort order changes
+  useEffect(() => {
+    fetchStudents(selectedBatch);
+  }, [sortOrder]);
 
   // Handle batch filter
   const handleBatchFilter = (e) => {
@@ -88,7 +116,10 @@ export default function ManageStudents() {
     e.preventDefault();
     try {
       setActionLoading(true);
-      await api.put(`/departmentAdmin/student/${selectedStudent._id}`, selectedStudent);
+      await api.put(
+        `/departmentAdmin/student/${selectedStudent._id}`,
+        selectedStudent
+      );
       toast.success("Student updated successfully!");
       setSelectedStudent(null);
       fetchStudents(selectedBatch);
@@ -100,27 +131,71 @@ export default function ManageStudents() {
     }
   };
 
+  // ✅ Filter students based on search
+  const filteredStudents = students.filter((s) => {
+    const search = searchTerm.toLowerCase();
+    return (
+      s.name?.toLowerCase().includes(search) ||
+      s.email?.toLowerCase().includes(search) ||
+      s.rollNo?.toLowerCase().includes(search) ||
+      s.batch?.name?.toLowerCase().includes(search)
+    );
+  });
+
+  // Pagination logic (apply after filtering)
+  const indexOfLast = page * studentsPerPage;
+  const indexOfFirst = indexOfLast - studentsPerPage;
+  const currentStudents = filteredStudents.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
+
   if (loading) return <p className="text-center py-4">Loading students...</p>;
 
   return (
     <div className="p-4 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-4 text-center">Manage Students</h2>
+      <h2 className="text-2xl font-semibold mb-4 text-center">
+        Manage Students
+      </h2>
 
-      {/* Batch Filter */}
-      <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-2">
-        <label className="font-medium">Filter by Batch:</label>
-        <select
-          value={selectedBatch}
-          onChange={handleBatchFilter}
-          className="p-2 border rounded w-full sm:w-auto"
+      {/* Top Controls */}
+      <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        {/* Batch Filter */}
+        <div className="flex items-center gap-2">
+          <label className="font-medium">Batch:</label>
+          <select
+            value={selectedBatch}
+            onChange={handleBatchFilter}
+            className="p-2 border rounded w-full sm:w-auto"
+          >
+            <option value="">All</option>
+            {batches.map((b) => (
+              <option key={b._id} value={b._id}>
+                {b.name} {b.year ? `(${b.year})` : ""}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Search */}
+        <div className="flex-1">
+          <input
+            type="text"
+            placeholder="Search by name, email, roll no, batch..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setPage(1); // reset page when searching
+            }}
+            className="w-full sm:w-64 p-2 border rounded"
+          />
+        </div>
+
+        {/* Sort Toggle */}
+        <button
+          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          <option value="">All Batches</option>
-          {batches.map((b) => (
-            <option key={b._id} value={b._id}>
-              {b.name} {b.year ? `(${b.year})` : ""}
-            </option>
-          ))}
-        </select>
+          Sort by Roll No ({sortOrder === "asc" ? "Asc" : "Desc"})
+        </button>
       </div>
 
       {/* Students Table */}
@@ -136,8 +211,8 @@ export default function ManageStudents() {
             </tr>
           </thead>
           <tbody>
-            {students.length > 0 ? (
-              students.map((s) => (
+            {currentStudents.length > 0 ? (
+              currentStudents.map((s) => (
                 <tr key={s._id} className="hover:bg-gray-50">
                   <td className="border px-3 py-2">{s.name}</td>
                   <td className="border px-3 py-2">{s.email}</td>
@@ -170,6 +245,29 @@ export default function ManageStudents() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center space-x-2 mt-4">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          >
+            Prev
+          </button>
+          <span>
+            Page {page} of {totalPages}
+          </span>
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage(page + 1)}
+            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* Edit Student Form */}
       {selectedStudent && (

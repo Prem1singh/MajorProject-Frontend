@@ -5,14 +5,35 @@ import { toast } from "react-toastify";
 export default function ManageTeachers() {
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false); // ✅ for update/delete
+  const [actionLoading, setActionLoading] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
+
+  // Pagination states
+  const [page, setPage] = useState(1);
+  const teachersPerPage = 5;
+
+  // Sorting states
+  const [sortOrder, setSortOrder] = useState("asc"); // "asc" or "desc"
+
+  // 🔍 Search
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch teachers
   const fetchTeachers = async () => {
     try {
       const res = await api.get("/departmentAdmin/teachers");
-      setTeachers(res.data || []);
+      let data = res.data || [];
+
+      // ✅ Sort by employeeId before setting
+      data = data.sort((a, b) => {
+        const empA = a.employeeId || "";
+        const empB = b.employeeId || "";
+        if (sortOrder === "asc")
+          return empA.localeCompare(empB, "en", { numeric: true });
+        return empB.localeCompare(empA, "en", { numeric: true });
+      });
+
+      setTeachers(data);
     } catch (err) {
       console.error(err);
       toast.error("Failed to fetch teachers");
@@ -23,7 +44,7 @@ export default function ManageTeachers() {
 
   useEffect(() => {
     fetchTeachers();
-  }, []);
+  }, [sortOrder]); // refetch on sort change
 
   // Delete teacher
   const handleDelete = async (teacherId) => {
@@ -58,11 +79,50 @@ export default function ManageTeachers() {
     }
   };
 
+  // ✅ Filter teachers based on search
+  const filteredTeachers = teachers.filter((t) => {
+    const search = searchTerm.toLowerCase();
+    return (
+      t.name?.toLowerCase().includes(search) ||
+      t.email?.toLowerCase().includes(search) ||
+      t.employeeId?.toLowerCase().includes(search)
+    );
+  });
+
+  // Pagination logic (after filtering)
+  const indexOfLast = page * teachersPerPage;
+  const indexOfFirst = indexOfLast - teachersPerPage;
+  const currentTeachers = filteredTeachers.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredTeachers.length / teachersPerPage);
+
   if (loading) return <p>Loading...</p>;
 
   return (
     <div className="p-4 md:p-6">
       <h2 className="text-xl font-semibold mb-4">Manage Teachers</h2>
+
+      {/* Top Controls */}
+      <div className="mb-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+        {/* Search Bar */}
+        <input
+          type="text"
+          placeholder="Search by name, email, or employee ID..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setPage(1); // reset page when searching
+          }}
+          className="w-full sm:w-72 p-2 border rounded"
+        />
+
+        {/* Sort Toggle */}
+        <button
+          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Sort by Employee ID ({sortOrder === "asc" ? "Ascending" : "Descending"})
+        </button>
+      </div>
 
       {/* Teachers Table */}
       <div className="overflow-x-auto">
@@ -76,8 +136,8 @@ export default function ManageTeachers() {
             </tr>
           </thead>
           <tbody>
-            {teachers.length ? (
-              teachers.map((t) => (
+            {currentTeachers.length ? (
+              currentTeachers.map((t) => (
                 <tr key={t._id}>
                   <td className="border px-3 py-2">{t.name}</td>
                   <td className="border px-3 py-2">{t.email}</td>
@@ -87,7 +147,9 @@ export default function ManageTeachers() {
                       disabled={actionLoading}
                       onClick={() => setSelectedTeacher(t)}
                       className={`w-[60px] px-2 py-1 rounded text-white ${
-                        actionLoading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                        actionLoading
+                          ? "bg-blue-400 cursor-not-allowed"
+                          : "bg-blue-600 hover:bg-blue-700"
                       }`}
                     >
                       {actionLoading ? "..." : "Edit"}
@@ -96,7 +158,9 @@ export default function ManageTeachers() {
                       disabled={actionLoading}
                       onClick={() => handleDelete(t._id)}
                       className={`my-2 px-2 py-1 rounded text-white ${
-                        actionLoading ? "bg-red-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700"
+                        actionLoading
+                          ? "bg-red-400 cursor-not-allowed"
+                          : "bg-red-600 hover:bg-red-700"
                       }`}
                     >
                       {actionLoading ? "..." : "Delete"}
@@ -114,6 +178,29 @@ export default function ManageTeachers() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center space-x-2 mt-4">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          >
+            Prev
+          </button>
+          <span>
+            Page {page} of {totalPages}
+          </span>
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage(page + 1)}
+            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* Edit Teacher Form */}
       {selectedTeacher && (

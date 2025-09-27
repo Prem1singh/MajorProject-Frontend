@@ -32,7 +32,7 @@ import AddSubject from './pages/department/Subject/Subject'
 import Exams from './pages/department/Exams/Exams'
 import StudyMaterial from './pages/common/StudyMaterial/StudyMaterial';
 import DepartmentMarksViewer from './pages/department/Marks/DepartmentMarksViewer';
-import StudentDoubtForum from './pages/common/StudyMaterial/Student/StudentDoubtForum';
+import StudentDoubtForum from './pages/student/StudentDoubtForum';
 import Performance from './pages/common/Performance/Performance';
 
 import AdminPlacements from './pages/department/Placement/Placements';

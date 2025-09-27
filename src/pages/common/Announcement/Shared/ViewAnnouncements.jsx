@@ -7,6 +7,11 @@ export default function ViewAnnouncements() {
   const [selectedSubject, setSelectedSubject] = useState("all");
   const [loading, setLoading] = useState(false);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("date"); // 'date' or 'title'
+  const [sortOrder, setSortOrder] = useState("desc"); // 'asc' or 'desc'
+
+  // Fetch subjects
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
@@ -19,6 +24,7 @@ export default function ViewAnnouncements() {
     fetchSubjects();
   }, []);
 
+  // Fetch announcements
   useEffect(() => {
     const fetchAnnouncements = async () => {
       setLoading(true);
@@ -38,9 +44,31 @@ export default function ViewAnnouncements() {
     fetchAnnouncements();
   }, [selectedSubject]);
 
+  // Filter and sort announcements
+  const filteredAnnouncements = announcements
+    .filter(
+      (a) =>
+        a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        a.description.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      let aValue, bValue;
+      if (sortBy === "date") {
+        aValue = new Date(a.createdAt).getTime();
+        bValue = new Date(b.createdAt).getTime();
+      } else {
+        aValue = a.title.toLowerCase();
+        bValue = b.title.toLowerCase();
+      }
+
+      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+
   return (
     <div className="space-y-6">
-      {/* Filter */}
+      {/* Controls */}
       <div className="flex flex-wrap items-center gap-4">
         <label className="font-medium">Filter by Subject:</label>
         <select
@@ -55,14 +83,43 @@ export default function ViewAnnouncements() {
             </option>
           ))}
         </select>
+
+        <input
+          type="text"
+          placeholder="Search by title or description"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="border px-3 py-2 rounded-lg flex-1 min-w-[200px]"
+        />
+
+        <div className="flex items-center gap-2">
+          <label>Sort by:</label>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="border px-2 py-1 rounded"
+          >
+            <option value="date">Date</option>
+            <option value="title">Title</option>
+          </select>
+
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            className="border px-2 py-1 rounded"
+          >
+            <option value="asc">Asc</option>
+            <option value="desc">Desc</option>
+          </select>
+        </div>
       </div>
 
       {/* Announcements List */}
       {loading ? (
         <p className="text-gray-500">Loading announcements...</p>
-      ) : announcements.length > 0 ? (
+      ) : filteredAnnouncements.length > 0 ? (
         <ul className="space-y-3">
-          {announcements.map((a) => (
+          {filteredAnnouncements.map((a) => (
             <li
               key={a._id}
               className="border rounded-lg p-4 hover:bg-gray-50 transition"

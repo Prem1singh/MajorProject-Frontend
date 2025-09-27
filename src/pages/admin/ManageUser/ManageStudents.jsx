@@ -14,6 +14,13 @@ export default function ManageStudents() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const studentsPerPage = 10;
+
+  // 🔍 Search
+  const [searchTerm, setSearchTerm] = useState("");
+
   // Fetch departments
   useEffect(() => {
     api
@@ -56,6 +63,7 @@ export default function ManageStudents() {
       setStudents([]);
       return;
     }
+    setCurrentPage(1); // reset page on batch change
     fetchStudents();
   }, [selectedBatch]);
 
@@ -68,17 +76,30 @@ export default function ManageStudents() {
       .finally(() => setLoading(false));
   };
 
+  // 🔍 Filter students based on search term
+  const filteredStudents = students.filter((s) => {
+    const search = searchTerm.toLowerCase();
+    return (
+      s.name.toLowerCase().includes(search) ||
+      s.email.toLowerCase().includes(search) ||
+      (s.rollNo?.toLowerCase().includes(search) ?? false)
+    );
+  });
+
+  // Pagination logic
+  const indexOfLastStudent = currentPage * studentsPerPage;
+  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
+  const currentStudents = filteredStudents.slice(indexOfFirstStudent, indexOfLastStudent);
+  const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
+
   return (
     <div className="p-4 sm:p-6 bg-white shadow-md rounded-xl space-y-6">
       <h2 className="text-2xl font-bold text-gray-800">Manage Students</h2>
 
-      {/* Filters */}
-      <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-700 mb-4">
-          Filter Students
-        </h3>
+      {/* Filters + Search */}
+      <div className="bg-gray-50 p-4 rounded-lg shadow-sm space-y-4">
+        <h3 className="text-lg font-semibold text-gray-700">Filter Students</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {/* Department Select */}
           <select
             value={selectedDept}
             onChange={(e) => setSelectedDept(e.target.value)}
@@ -92,7 +113,6 @@ export default function ManageStudents() {
             ))}
           </select>
 
-          {/* Course Select */}
           <select
             value={selectedCourse?._id || ""}
             onChange={(e) =>
@@ -109,7 +129,6 @@ export default function ManageStudents() {
             ))}
           </select>
 
-          {/* Batch Select */}
           <select
             value={selectedBatch}
             onChange={(e) => setSelectedBatch(e.target.value)}
@@ -124,6 +143,18 @@ export default function ManageStudents() {
             ))}
           </select>
         </div>
+
+        {/* Search Bar */}
+        <input
+          type="text"
+          placeholder="Search by name, email, roll no..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // reset page on search
+          }}
+          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+        />
       </div>
 
       {/* Error */}
@@ -137,34 +168,57 @@ export default function ManageStudents() {
       <div className="overflow-x-auto">
         {loading ? (
           <p className="text-gray-600 text-center py-4">Loading students...</p>
-        ) : students.length === 0 ? (
+        ) : currentStudents.length === 0 ? (
           <p className="text-gray-500 italic text-center py-4">
             No students found for the selected filters.
           </p>
         ) : (
-          <table className="w-full border rounded-lg shadow-md min-w-[400px]">
-            <thead className="bg-blue-600 text-white">
-              <tr>
-                <th className="px-4 py-3 text-left">Name</th>
-                <th className="px-4 py-3 text-left">Email</th>
-                <th className="px-4 py-3 text-left">Roll No</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((s, idx) => (
-                <tr
-                  key={s._id}
-                  className={`${
-                    idx % 2 === 0 ? "bg-gray-50" : "bg-white"
-                  } hover:bg-blue-50 transition`}
-                >
-                  <td className="px-4 py-3">{s.name}</td>
-                  <td className="px-4 py-3">{s.email}</td>
-                  <td className="px-4 py-3">{s.rollNo}</td>
+          <>
+            <table className="w-full border rounded-lg shadow-md min-w-[400px]">
+              <thead className="bg-blue-600 text-white">
+                <tr>
+                  <th className="px-4 py-3 text-left">Name</th>
+                  <th className="px-4 py-3 text-left">Email</th>
+                  <th className="px-4 py-3 text-left">Roll No</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {currentStudents.map((s, idx) => (
+                  <tr
+                    key={s._id}
+                    className={`${
+                      idx % 2 === 0 ? "bg-gray-50" : "bg-white"
+                    } hover:bg-blue-50 transition`}
+                  >
+                    <td className="px-4 py-3">{s.name}</td>
+                    <td className="px-4 py-3">{s.email}</td>
+                    <td className="px-4 py-3">{s.rollNo}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Pagination */}
+            <div className="flex justify-center items-center gap-4 mt-4">
+              <button
+                className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
+                onClick={() => setCurrentPage((p) => p - 1)}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+              <span className="text-gray-700 font-medium">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
+                onClick={() => setCurrentPage((p) => p + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+          </>
         )}
       </div>
     </div>

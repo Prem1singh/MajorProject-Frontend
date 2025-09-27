@@ -5,10 +5,20 @@ import { toast } from "react-toastify";
 
 export default function Courses() {
   const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true); // for fetching
-  const [actionLoading, setActionLoading] = useState(false); // ✅ for add/edit/delete
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
   const [formData, setFormData] = useState({ name: "", code: "" });
   const [editingCourse, setEditingCourse] = useState(null);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const coursesPerPage = 5;
+
+  // Search
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Sort
+  const [sortAsc, setSortAsc] = useState(true);
 
   // Fetch courses
   const fetchCourses = async () => {
@@ -34,13 +44,11 @@ export default function Courses() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Reset form
   const resetForm = () => {
     setEditingCourse(null);
     setFormData({ name: "", code: "" });
   };
 
-  // Add or update course
   const handleSubmit = async (e) => {
     e.preventDefault();
     setActionLoading(true);
@@ -62,13 +70,11 @@ export default function Courses() {
     }
   };
 
-  // Edit course
   const handleEdit = (course) => {
     setEditingCourse(course);
     setFormData({ name: course.name, code: course.code });
   };
 
-  // Delete course
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this course?")) return;
     setActionLoading(true);
@@ -84,17 +90,31 @@ export default function Courses() {
     }
   };
 
-  if (loading) return <p className="text-center py-4">Loading courses...</p>;
+  // 🔍 Filter by search
+  const filteredCourses = courses.filter(
+    (c) =>
+      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.code.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // 🔃 Sort by name
+  const sortedCourses = [...filteredCourses].sort((a, b) => {
+    if (sortAsc) return a.name.localeCompare(b.name);
+    else return b.name.localeCompare(a.name);
+  });
+
+  // Pagination
+  const indexOfLastCourse = currentPage * coursesPerPage;
+  const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
+  const currentCourses = sortedCourses.slice(indexOfFirstCourse, indexOfLastCourse);
+  const totalPages = Math.ceil(sortedCourses.length / coursesPerPage);
 
   return (
     <div className="p-4 max-w-5xl mx-auto">
       <h2 className="text-2xl font-bold mb-4 text-center md:text-left">🎓 Courses</h2>
 
-      {/* Add/Edit Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="mb-6 flex flex-col md:flex-row gap-3 items-center"
-      >
+      {/* Form */}
+      <form className="mb-6 flex flex-col md:flex-row gap-3 items-center" onSubmit={handleSubmit}>
         <input
           type="text"
           name="name"
@@ -122,12 +142,12 @@ export default function Courses() {
             actionLoading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
           } text-white px-4 py-2 rounded`}
         >
-          {actionLoading
-            ? editingCourse
+          {editingCourse
+            ? actionLoading
               ? "Updating..."
-              : "Adding..."
-            : editingCourse
-            ? "Update Course"
+              : "Update Course"
+            : actionLoading
+            ? "Adding..."
             : "Add Course"}
         </button>
         {editingCourse && (
@@ -142,6 +162,26 @@ export default function Courses() {
         )}
       </form>
 
+      {/* Search & Sort */}
+      <div className="mb-4 flex flex-col sm:flex-row gap-3 items-center">
+        <input
+          type="text"
+          placeholder="Search by name or code..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // reset page on search
+          }}
+          className="border p-2 rounded flex-1"
+        />
+        <button
+          onClick={() => setSortAsc(!sortAsc)}
+          className="bg-gray-200 hover:bg-gray-300 px-3 py-2 rounded"
+        >
+          Sort by Name {sortAsc ? "↑" : "↓"}
+        </button>
+      </div>
+
       {/* Courses Table */}
       <div className="overflow-x-auto">
         <table className="w-full border-collapse border shadow-md rounded-lg overflow-hidden">
@@ -154,15 +194,13 @@ export default function Courses() {
             </tr>
           </thead>
           <tbody>
-            {courses.length > 0 ? (
-              courses.map((course, idx) => (
+            {currentCourses.length > 0 ? (
+              currentCourses.map((course, idx) => (
                 <tr
                   key={course._id}
-                  className={`text-center ${
-                    idx % 2 === 0 ? "bg-gray-50" : "bg-white"
-                  } hover:bg-gray-100`}
+                  className={`text-center ${idx % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-gray-100`}
                 >
-                  <td className="border p-2">{idx + 1}</td>
+                  <td className="border p-2">{indexOfFirstCourse + idx + 1}</td>
                   <td className="border p-2">{course.name}</td>
                   <td className="border p-2">{course.code}</td>
                   <td className="border p-2 flex justify-center gap-2">
@@ -200,6 +238,27 @@ export default function Courses() {
             )}
           </tbody>
         </table>
+
+        {/* Pagination */}
+        <div className="flex justify-center items-center gap-4 mt-4">
+          <button
+            className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
+            onClick={() => setCurrentPage((p) => p - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          <span className="text-gray-700 font-medium">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
+            onClick={() => setCurrentPage((p) => p + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );

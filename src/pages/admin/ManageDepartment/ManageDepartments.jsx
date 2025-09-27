@@ -7,14 +7,23 @@ export default function ManageDepartments() {
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ name: "", code: "" });
   const [editingId, setEditingId] = useState(null);
-  const [formLoading, setFormLoading] = useState(false); // 🔹 only for add/update
+  const [formLoading, setFormLoading] = useState(false);
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // 🔍 Search
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch departments
   const fetchDepartments = async () => {
     try {
       setLoading(true);
       const res = await api.get("/admin/departments");
-      setDepartments(res.data);
+      // ✅ Sort departments alphabetically by name
+      const sorted = res.data.sort((a, b) => a.name.localeCompare(b.name));
+      setDepartments(sorted);
     } catch (err) {
       console.error("Error fetching departments:", err);
     } finally {
@@ -71,75 +80,106 @@ export default function ManageDepartments() {
     }
   };
 
+  // 🔍 Filter departments based on search term
+  const filteredDepartments = departments.filter((dept) => {
+    const search = searchTerm.toLowerCase();
+    return (
+      dept.name.toLowerCase().includes(search) ||
+      dept.code.toLowerCase().includes(search)
+    );
+  });
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentDepartments = filteredDepartments.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredDepartments.length / itemsPerPage);
+
   return (
     <div className="p-6 bg-white rounded-xl shadow-md">
       <h2 className="text-2xl font-bold mb-6 text-gray-800">
         Manage Departments
       </h2>
 
-      {/* Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
-      >
-        <input
-          type="text"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          placeholder="Department Name"
-          className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          required
-          disabled={formLoading}
-        />
-        <input
-          type="text"
-          name="code"
-          value={form.code}
-          onChange={handleChange}
-          placeholder="Department Code"
-          className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          required
-          disabled={formLoading}
-        />
-        <div className="flex gap-2">
-          <button
-            type="submit"
+      {/* 🔍 Search Bar + Form */}
+      <div className="mb-6 flex flex-col md:flex-row gap-4 items-start md:items-center">
+      
+        {/* Form */}
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1"
+        >
+          <input
+            type="text"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            placeholder="Department Name"
+            className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            required
             disabled={formLoading}
-            className={`px-5 py-2 rounded-lg transition text-white ${
-              formLoading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
-            }`}
-          >
-            {formLoading
-              ? editingId
-                ? "Updating..."
-                : "Adding..."
-              : editingId
-              ? "Update"
-              : "Add"}
-          </button>
-          {editingId && (
+          />
+          <input
+            type="text"
+            name="code"
+            value={form.code}
+            onChange={handleChange}
+            placeholder="Department Code"
+            className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            required
+            disabled={formLoading}
+          />
+          <div className="flex gap-2">
             <button
-              type="button"
-              onClick={() => {
-                setEditingId(null);
-                setForm({ name: "", code: "" });
-              }}
+              type="submit"
               disabled={formLoading}
-              className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition"
+              className={`px-5 py-2 rounded-lg transition text-white ${
+                formLoading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
             >
-              Cancel
+              {formLoading
+                ? editingId
+                  ? "Updating..."
+                  : "Adding..."
+                : editingId
+                ? "Update"
+                : "Add"}
             </button>
-          )}
-        </div>
-      </form>
+            {editingId && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingId(null);
+                  setForm({ name: "", code: "" });
+                }}
+                disabled={formLoading}
+                className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </form>
+       
+        <input
+          type="text"
+          placeholder="Search by name or code..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // reset page on search
+          }}
+          className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none w-full md:w-72"
+        />
+
+      </div>
 
       {/* List */}
       {loading ? (
         <p className="text-gray-600">Loading departments...</p>
-      ) : departments.length === 0 ? (
+      ) : filteredDepartments.length === 0 ? (
         <p className="text-gray-500">No departments found.</p>
       ) : (
         <div className="overflow-x-auto">
@@ -153,12 +193,14 @@ export default function ManageDepartments() {
               </tr>
             </thead>
             <tbody>
-              {departments.map((dept, idx) => (
+              {currentDepartments.map((dept, idx) => (
                 <tr
                   key={dept._id}
                   className="hover:bg-gray-50 transition-colors"
                 >
-                  <td className="p-3 border text-center">{idx + 1}</td>
+                  <td className="p-3 border text-center">
+                    {indexOfFirstItem + idx + 1}
+                  </td>
                   <td className="p-3 border">{dept.name}</td>
                   <td className="p-3 border">{dept.code}</td>
                   <td className="p-3 border text-center space-x-2">
@@ -179,6 +221,27 @@ export default function ManageDepartments() {
               ))}
             </tbody>
           </table>
+
+          {/* Pagination Controls */}
+          <div className="flex justify-center items-center gap-2 mt-4">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+              className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <span className="px-3 py-1">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+              className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -6,10 +6,11 @@ import { toast } from "react-toastify";
 export default function Batches() {
   const [batches, setBatches] = useState([]);
   const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true); // for fetching
-  const [actionLoading, setActionLoading] = useState(false); // for add/edit/delete
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
 
-  const [selectedCourse, setSelectedCourse] = useState(""); // course filter
+  const [selectedCourse, setSelectedCourse] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -22,7 +23,10 @@ export default function Batches() {
   });
   const [editingBatch, setEditingBatch] = useState(null);
 
-  // Fetch batches (with optional course filter)
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const batchesPerPage = 5;
+
   const fetchBatches = async (courseId = "") => {
     setLoading(true);
     try {
@@ -36,7 +40,6 @@ export default function Batches() {
     }
   };
 
-  // Fetch courses
   const fetchCourses = async () => {
     try {
       const res = await api.get("/courses");
@@ -52,7 +55,6 @@ export default function Batches() {
     fetchCourses();
   }, []);
 
-  // Reset form helper
   const resetForm = () => {
     setEditingBatch(null);
     setFormData({
@@ -66,7 +68,6 @@ export default function Batches() {
     });
   };
 
-  // Handle course filter
   const handleCourseFilter = (e) => {
     const courseId = e.target.value;
     setSelectedCourse(courseId);
@@ -74,7 +75,6 @@ export default function Batches() {
     fetchBatches(courseId);
   };
 
-  // Handle form input change
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -83,7 +83,6 @@ export default function Batches() {
     });
   };
 
-  // Submit form for add/update
   const handleSubmit = async (e) => {
     e.preventDefault();
     setActionLoading(true);
@@ -105,7 +104,6 @@ export default function Batches() {
     }
   };
 
-  // Edit batch
   const handleEdit = (batch) => {
     setEditingBatch(batch);
     setFormData({
@@ -119,7 +117,6 @@ export default function Batches() {
     });
   };
 
-  // Delete batch
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this batch?")) return;
     setActionLoading(true);
@@ -135,26 +132,27 @@ export default function Batches() {
     }
   };
 
+  // 🔍 Filter by search term (batch name or course name)
+  const filteredBatches = batches.filter(
+    (b) =>
+      b.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      b.course?.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // 🔃 Sort by year descending (recent first)
+  const sortedBatches = [...filteredBatches].sort((a, b) => b.year - a.year);
+
+  // Pagination logic
+  const indexOfLastBatch = currentPage * batchesPerPage;
+  const indexOfFirstBatch = indexOfLastBatch - batchesPerPage;
+  const currentBatches = sortedBatches.slice(indexOfFirstBatch, indexOfLastBatch);
+  const totalPages = Math.ceil(sortedBatches.length / batchesPerPage);
+
   return (
     <div className="p-4 max-w-7xl mx-auto">
       <h2 className="text-2xl font-bold mb-4 text-center md:text-left">📚 Batches</h2>
 
-      {/* Course Filter */}
-      <div className="mb-4 flex flex-col md:flex-row items-center gap-4">
-        <label className="font-semibold">Filter by Course:</label>
-        <select
-          value={selectedCourse}
-          onChange={handleCourseFilter}
-          className="border p-2 rounded w-full md:w-64"
-        >
-          <option value="">All Courses</option>
-          {courses.map((c) => (
-            <option key={c._id} value={c._id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </div>
+
 
       {/* Add/Edit Form */}
       <form onSubmit={handleSubmit} className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -176,8 +174,6 @@ export default function Batches() {
           className="border p-2 rounded"
           required
         />
-
-        {/* Current Semester */}
         <select
           name="currentSem"
           value={formData.currentSem}
@@ -193,7 +189,6 @@ export default function Batches() {
             </option>
           ))}
         </select>
-
         <input
           type="number"
           name="year"
@@ -203,35 +198,16 @@ export default function Batches() {
           className="border p-2 rounded"
           required
         />
-
-        <select
-          name="status"
-          value={formData.status}
-          onChange={handleChange}
-          className="border p-2 rounded"
-        >
+        <select name="status" value={formData.status} onChange={handleChange} className="border p-2 rounded">
           <option value="Active">Active</option>
           <option value="Completed">Completed</option>
           <option value="Suspended">Suspended</option>
         </select>
-
         <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            name="dissertation"
-            checked={formData.dissertation}
-            onChange={handleChange}
-          />
+          <input type="checkbox" name="dissertation" checked={formData.dissertation} onChange={handleChange} />
           Dissertation
         </label>
-
-        <select
-          name="course"
-          value={formData.course}
-          onChange={handleChange}
-          className="border p-2 rounded"
-          required
-        >
+        <select name="course" value={formData.course} onChange={handleChange} className="border p-2 rounded" required>
           <option value="">Select Course</option>
           {courses.map((c) => (
             <option key={c._id} value={c._id}>
@@ -245,19 +221,10 @@ export default function Batches() {
             type="submit"
             disabled={actionLoading}
             className={`px-4 py-2 rounded text-white ${
-              actionLoading
-                ? "bg-blue-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
+              actionLoading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
             }`}
           >
-            {actionLoading
-              ? editingBatch
-                ? "Updating..."
-                : "Adding..."
-              : editingBatch
-              ? "Update"
-              : "Add"}{" "}
-            Batch
+            {actionLoading ? (editingBatch ? "Updating..." : "Adding...") : editingBatch ? "Update" : "Add"} Batch
           </button>
           {editingBatch && (
             <button
@@ -272,6 +239,33 @@ export default function Batches() {
         </div>
       </form>
 
+      {/* Filters */}
+      <div className="mb-4 flex flex-col sm:flex-row gap-3 items-center">
+        <label className="font-semibold">Filter by Course:</label>
+        <select
+          value={selectedCourse}
+          onChange={handleCourseFilter}
+          className="border p-2 rounded w-full sm:w-64"
+        >
+          <option value="">All Courses</option>
+          {courses.map((c) => (
+            <option key={c._id} value={c._id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+
+        <input
+          type="text"
+          placeholder="Search by batch or course..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // reset page on search
+          }}
+          className="border p-2 rounded flex-1 sm:flex-none sm:w-64"
+        />
+      </div>
       {/* Batches Table */}
       {loading ? (
         <p className="text-center text-gray-500">Loading batches...</p>
@@ -292,15 +286,13 @@ export default function Batches() {
               </tr>
             </thead>
             <tbody>
-              {batches.length > 0 ? (
-                batches.map((batch, idx) => (
+              {currentBatches.length > 0 ? (
+                currentBatches.map((batch, idx) => (
                   <tr
                     key={batch._id}
-                    className={`text-center ${
-                      idx % 2 === 0 ? "bg-gray-50" : "bg-white"
-                    } hover:bg-gray-100`}
+                    className={`text-center ${idx % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-gray-100`}
                   >
-                    <td className="border p-2">{idx + 1}</td>
+                    <td className="border p-2">{indexOfFirstBatch + idx + 1}</td>
                     <td className="border p-2">{batch.name}</td>
                     <td className="border p-2">{batch.totalSem}</td>
                     <td className="border p-2">{batch.currentSem || "-"}</td>
@@ -335,6 +327,27 @@ export default function Batches() {
               )}
             </tbody>
           </table>
+
+          {/* Pagination */}
+          <div className="flex justify-center items-center gap-4 mt-4">
+            <button
+              className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => p - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            <span className="text-gray-700 font-medium">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
+              onClick={() => setCurrentPage((p) => p + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
-import api from "../../../../utils/axiosInstance";
+import api from "../../utils/axiosInstance";
 
 export default function StudentDoubtForum() {
   const [doubts, setDoubts] = useState([]);
   const [newDoubt, setNewDoubt] = useState("");
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOrder, setSortOrder] = useState("latest"); // options: latest, oldest
 
   // Fetch doubts
   const fetchDoubts = async () => {
@@ -72,12 +74,43 @@ export default function StudentDoubtForum() {
     }
   };
 
+  // Filter and sort doubts
+  const filteredDoubts = doubts
+    .filter(
+      (d) =>
+        d.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (d.studentName || "Anonymous").toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (sortOrder === "latest") return new Date(b.createdAt) - new Date(a.createdAt);
+      else return new Date(a.createdAt) - new Date(b.createdAt);
+    });
+
   return (
     <div className="max-w-3xl mx-auto p-4 space-y-6">
       <h2 className="text-2xl font-bold text-gray-800">Student Doubt Forum</h2>
 
+      {/* Search and Sort */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+        <input
+          type="text"
+          placeholder="Search doubts..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="flex-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        <select
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value)}
+          className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
+          <option value="latest">Latest First</option>
+          <option value="oldest">Oldest First</option>
+        </select>
+      </div>
+
       {/* Post a new doubt */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 mt-2">
         <input
           type="text"
           className="flex-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -96,11 +129,11 @@ export default function StudentDoubtForum() {
       {/* Doubts list */}
       {loading ? (
         <p>Loading doubts...</p>
-      ) : doubts.length === 0 ? (
-        <p>No doubts yet. Be the first to ask!</p>
+      ) : filteredDoubts.length === 0 ? (
+        <p>No doubts match your search.</p>
       ) : (
         <div className="space-y-4">
-          {doubts.map((doubt) => (
+          {filteredDoubts.map((doubt) => (
             <div key={doubt._id} className="border rounded-lg p-4 bg-gray-50 relative">
               <p className="font-semibold">{doubt.studentName || "Anonymous"} asked:</p>
               <p className="mb-2">{doubt.question}</p>

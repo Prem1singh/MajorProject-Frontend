@@ -6,13 +6,18 @@ export default function DepartmentMarksViewer() {
   const [students, setStudents] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [selectedBatch, setSelectedBatch] = useState("");
-  const [viewBy, setViewBy] = useState("student"); // "student" or "subject"
+  const [viewBy, setViewBy] = useState("student");
   const [selectedStudent, setSelectedStudent] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
   const [marks, setMarks] = useState([]);
-  const [exams, setExams] = useState([]); // dynamic exam columns
+  const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const marksPerPage = 5;
+
+  console.log(marks)
   // Fetch batches on load
   useEffect(() => {
     const fetchBatches = async () => {
@@ -30,13 +35,14 @@ export default function DepartmentMarksViewer() {
         api.get(`/departmentAdmin/students/batch?batch=${selectedBatch}`),
         api.get(`/departmentAdmin/subjects/batch?batch=${selectedBatch}`)
       ]);
-
       setStudents(studentsRes.data);
       setSubjects(subjectsRes.data);
       setSelectedStudent("");
       setSelectedSubject("");
       setMarks([]);
       setExams([]);
+      setSearchTerm("");
+      setCurrentPage(1);
     };
     fetchData();
   }, [selectedBatch]);
@@ -52,8 +58,9 @@ export default function DepartmentMarksViewer() {
       if (viewBy === "subject") url += `&subject=${selectedSubject}`;
       const res = await api.get(url);
 
-      setExams(res.data.exams || []); // dynamic exam names
+      setExams(res.data.exams || []);
       setMarks(res.data.data || []);
+      setCurrentPage(1);
     } catch (err) {
       console.error(err);
       alert("Failed to fetch marks");
@@ -61,6 +68,20 @@ export default function DepartmentMarksViewer() {
       setLoading(false);
     }
   };
+
+  // Filter by search
+  const filteredMarks = marks.filter((m) =>
+    m.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Sort by rollNo ascending (if present)
+  const sortedMarks = [...filteredMarks].sort((a, b) => (a.rollNo || 0) - (b.rollNo || 0));
+
+  // Pagination
+  const indexOfLastMark = currentPage * marksPerPage;
+  const indexOfFirstMark = indexOfLastMark - marksPerPage;
+  const currentMarks = sortedMarks.slice(indexOfFirstMark, indexOfLastMark);
+  const totalPages = Math.ceil(sortedMarks.length / marksPerPage);
 
   return (
     <div className="space-y-6 p-4 max-w-6xl mx-auto">
@@ -140,6 +161,20 @@ export default function DepartmentMarksViewer() {
         </div>
       )}
 
+      {/* Search Input */}
+      {marks.length > 0 && (
+        <input
+          type="text"
+          placeholder={`Search by ${viewBy === "student" ? "subject" : "student"} name...`}
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-400 mt-4"
+        />
+      )}
+
       {/* Fetch Button */}
       <button
         onClick={fetchMarks}
@@ -148,39 +183,58 @@ export default function DepartmentMarksViewer() {
         {loading ? "Fetching..." : "Get Marks"}
       </button>
 
-      {/* Marks Table */}
-      {marks.length > 0 && (
-        <div className="mt-6 overflow-x-auto">
-          <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden">
-            <thead className="bg-gray-100">
-              <tr>
-                {/* Conditionally show first column */}
-                {viewBy === "subject" && <th className="p-3 text-left text-gray-700">Student</th>}
-                {viewBy === "student" && <th className="p-3 text-left text-gray-700">Subject</th>}
+    {/* Marks Table */}
+{currentMarks.length > 0 && (
+  <div className="mt-6 overflow-x-auto">
+    <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden">
+      <thead className="bg-gray-100">
+        <tr>
+          {viewBy === "subject" && <th className="p-3 text-left text-gray-700">Roll No</th>}
+          {viewBy === "subject" && <th className="p-3 text-left text-gray-700">Student</th>}
+          {viewBy === "student" && <th className="p-3 text-left text-gray-700">Subject</th>}
+          {exams.map((exam) => (
+            <th key={exam} className="p-3 text-left text-gray-700">{exam}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {currentMarks.map((m, i) => (
+          <tr key={i} className="border-t hover:bg-gray-50">
+            {viewBy === "subject" && <td className="p-3">{m.rollNo || "-"}</td>}
+            {viewBy === "subject" && <td className="p-3">{m.name}</td>}
+            {viewBy === "student" && <td className="p-3">{m.name}</td>}
+            {exams.map((exam) => (
+              <td key={exam} className="p-3 font-semibold">
+                {m[exam] !== null && m[exam] !== undefined ? m[exam] : "-"}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
 
-                {/* Dynamic exam columns */}
-                {exams.map((exam) => (
-                  <th key={exam} className="p-3 text-left text-gray-700">{exam}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {marks.map((m, i) => (
-                <tr key={i} className="border-t hover:bg-gray-50">
-                  {viewBy === "subject" && <td className="p-3">{m.name}</td>}
-                  {viewBy === "student" && <td className="p-3">{m.name}</td>}
-
-                  {exams.map((exam) => (
-                    <td key={exam} className="p-3 font-semibold">
-                      {m[exam] !== null && m[exam] !== undefined ? m[exam] : "-"}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+    {/* Pagination */}
+    <div className="flex justify-center items-center gap-4 mt-4">
+      <button
+        className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
+        onClick={() => setCurrentPage((p) => p - 1)}
+        disabled={currentPage === 1}
+      >
+        Previous
+      </button>
+      <span className="text-gray-700 font-medium">
+        Page {currentPage} of {totalPages}
+      </span>
+      <button
+        className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
+        onClick={() => setCurrentPage((p) => p + 1)}
+        disabled={currentPage === totalPages}
+      >
+        Next
+      </button>
+    </div>
+  </div>
+)}
     </div>
   );
 }

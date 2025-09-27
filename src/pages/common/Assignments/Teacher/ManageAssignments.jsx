@@ -17,6 +17,11 @@ export default function ManageAssignments() {
     existingFileUrl: null,
   });
 
+  // Search & Sort State
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("deadline"); // title, marks, deadline
+  const [sortOrder, setSortOrder] = useState("asc"); // asc or desc
+
   const fetchAssignments = async () => {
     try {
       const res = await api.get("/assignments/my");
@@ -96,18 +101,75 @@ export default function ManageAssignments() {
     }
   };
 
+  // Apply search
+  const filteredAssignments = assignments.filter((a) => {
+    const subjectName = a.subject?.name || "";
+    return (
+      a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      a.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      subjectName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+
+  // Apply sort
+  const sortedAssignments = filteredAssignments.sort((a, b) => {
+    let aVal, bVal;
+    if (sortBy === "title") {
+      aVal = a.title.toLowerCase();
+      bVal = b.title.toLowerCase();
+    } else if (sortBy === "marks") {
+      aVal = parseFloat(a.marks || 0);
+      bVal = parseFloat(b.marks || 0);
+    } else {
+      aVal = new Date(a.deadline || 0).getTime();
+      bVal = new Date(b.deadline || 0).getTime();
+    }
+
+    if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
+    if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
+    return 0;
+  });
+
   if (loading)
     return <p className="text-gray-500 text-center mt-10">Loading assignments...</p>;
 
   return (
     <div className="p-4 sm:p-6 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">📚 Manage Assignments</h2>
+      <h2 className="text-2xl font-bold mb-4 text-gray-800">📚 Manage Assignments</h2>
 
-      {assignments.length === 0 ? (
-        <p className="text-gray-600 text-center">No assignments created yet.</p>
+      {/* Search & Sort Controls */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-6 items-center">
+        <input
+          type="text"
+          placeholder="Search by title, description, or subject"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="border p-2 rounded flex-1"
+        />
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="border p-2 rounded"
+        >
+          <option value="deadline">Sort by Deadline</option>
+          <option value="title">Sort by Title</option>
+          <option value="marks">Sort by Marks</option>
+        </select>
+        <select
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value)}
+          className="border p-2 rounded"
+        >
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
+      </div>
+
+      {sortedAssignments.length === 0 ? (
+        <p className="text-gray-600 text-center">No assignments found.</p>
       ) : (
         <div className="space-y-6">
-          {assignments.map((assignment) => (
+          {sortedAssignments.map((assignment) => (
             <div
               key={assignment._id}
               className="border rounded-xl p-5 shadow-md bg-white hover:shadow-lg transition"
