@@ -33,6 +33,7 @@ import Exams from './pages/department/Exams/Exams'
 import StudyMaterial from './pages/common/StudyMaterial/StudyMaterial';
 import DepartmentMarksViewer from './pages/department/Marks/DepartmentMarksViewer';
 import StudentDoubtForum from './pages/common/StudyMaterial/Student/StudentDoubtForum';
+import Performance from './pages/common/performance/performance'
 
 import AdminPlacements from './pages/department/Placement/Placements';
 import StudentPlacements from './pages/student/Placements';
@@ -62,6 +63,7 @@ const routes=createBrowserRouter(
         { path: "teacher/marks", element: <Marks /> },
         { path: "teacher/Announcement", element: <Announcement /> },
         { path: "teacher/study", element: <StudyMaterial /> },
+        { path: "teacher/performance", element: <Performance /> },
   
         // 🔹 Department Admin Routes
         { path: "department/dashboard", element: <DepartmentAdminDashboard /> }, 
@@ -72,6 +74,8 @@ const routes=createBrowserRouter(
         { path: "/department/batches", element: <Batches /> },
         { path: "/department/exams", element: <Exams /> },
         { path: "/department/marks", element: <DepartmentMarksViewer /> },{ path: "/department/placement", element: <AdminPlacements /> },
+        { path: "/department/performance", element: <Performance /> },
+        
 
 
         // 🔹 Student Routes
@@ -82,7 +86,8 @@ const routes=createBrowserRouter(
         { path: "student/Announcement", element: <Announcement /> },
         { path: "student/study", element: <StudyMaterial /> },
         { path: "student/doubt", element: <StudentDoubtForum /> },
-        { path: "student/placement", element: <StudentPlacements /> }
+        { path: "student/placement", element: <StudentPlacements /> },
+        { path: "student/performance", element: <Performance /> },
 
 
 
