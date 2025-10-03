@@ -10,9 +10,12 @@ export default function Exams() {
   const [selectedBatch, setSelectedBatch] = useState("");
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingExam, setEditingExam] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [deleteLoadingId, setDeleteLoadingId] = useState(null);
 
   const examTypes = ["sessional", "assignment", "attendance", "semester"];
-
   const [examForm, setExamForm] = useState({
     name: "",
     type: "",
@@ -40,7 +43,6 @@ export default function Exams() {
       setExams([]);
       return;
     }
-
     const fetchExams = async () => {
       setLoading(true);
       try {
@@ -57,32 +59,61 @@ export default function Exams() {
     fetchExams();
   }, [selectedBatch]);
 
+  // Handle form changes
   const handleChange = (e) => {
     setExamForm({ ...examForm, [e.target.name]: e.target.value });
   };
 
-  const handleAddExam = async (e) => {
+  // Open add/edit modal
+  const openAddModal = () => {
+    setEditingExam(null);
+    setExamForm({ name: "", type: "", totalMarks: "", description: "" });
+    setModalOpen(true);
+  };
+  const openEditModal = (exam) => {
+    setEditingExam(exam);
+    setExamForm({
+      name: exam.name,
+      type: exam.type,
+      totalMarks: exam.totalMarks,
+      description: exam.description || "",
+    });
+    setModalOpen(true);
+  };
+  const closeModal = () => setModalOpen(false);
+
+  // Save exam (add or edit)
+  const handleSaveExam = async (e) => {
     e.preventDefault();
     if (!selectedBatch) return toast.error("Select a batch first");
-
-    setLoading(true);
+    setActionLoading(true);
     try {
-      const res = await api.post("/exams", { ...examForm, batch: selectedBatch });
-      toast.success("Exam added successfully");
-      setExams((prev) => [...prev, res.data]);
-      setExamForm({ name: "", type: "", totalMarks: "", description: "" });
+      if (editingExam) {
+        // Edit
+        await api.put(`/exams/${editingExam._id}`, { ...examForm, batch: selectedBatch });
+        toast.success("Exam updated successfully");
+        setExams((prev) =>
+          prev.map((ex) => (ex._id === editingExam._id ? { ...ex, ...examForm } : ex))
+        );
+      } else {
+        // Add
+        const res = await api.post("/exams", { ...examForm, batch: selectedBatch });
+        toast.success("Exam added successfully");
+        setExams((prev) => [...prev, res.data]);
+      }
+      closeModal();
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Failed to add exam");
+      toast.error(err.response?.data?.message || "Failed to save exam");
     } finally {
-      setLoading(false);
+      setActionLoading(false);
     }
   };
 
+  // Delete exam
   const handleDeleteExam = async (examId) => {
     if (!window.confirm("Are you sure you want to delete this exam?")) return;
-
-    setLoading(true);
+    setDeleteLoadingId(examId);
     try {
       await api.delete(`/exams/${examId}`);
       toast.success("Exam deleted successfully");
@@ -91,7 +122,7 @@ export default function Exams() {
       console.error(err);
       toast.error(err.response?.data?.message || "Failed to delete exam");
     } finally {
-      setLoading(false);
+      setDeleteLoadingId(null);
     }
   };
 
@@ -100,11 +131,11 @@ export default function Exams() {
       <h2 className="text-2xl font-bold text-center mb-6">📚 Manage Exams</h2>
 
       {/* Batch Selector */}
-      <div className="mb-6">
+      <div className="mb-6 w-full text-center">
         <select
           value={selectedBatch}
           onChange={(e) => setSelectedBatch(e.target.value)}
-          className="border rounded-lg p-2 w-full md:w-1/2"
+          className="border rounded-lg p-2 w-full md:w-1/2 "
         >
           <option value="">Select Batch</option>
           {batches.map((b) => (
@@ -114,6 +145,18 @@ export default function Exams() {
           ))}
         </select>
       </div>
+
+      {/* Add Exam Button */}
+      {selectedBatch && (
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={openAddModal}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+          >
+            ➕ Add Exam
+          </button>
+        </div>
+      )}
 
       {/* Exams Table */}
       {loading ? (
@@ -134,9 +177,7 @@ export default function Exams() {
               {exams.map((ex, idx) => (
                 <tr
                   key={ex._id}
-                  className={`text-center ${
-                    idx % 2 === 0 ? "bg-gray-50" : "bg-white"
-                  } hover:bg-gray-100`}
+                  className={`text-center ${idx % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-gray-100`}
                 >
                   <td className="border p-2">{ex.name}</td>
                   <td className="border p-2 capitalize">{ex.type}</td>
@@ -144,10 +185,17 @@ export default function Exams() {
                   <td className="border p-2">{ex.description || "-"}</td>
                   <td className="border p-2 flex justify-center gap-2">
                     <button
-                      onClick={() => handleDeleteExam(ex._id)}
-                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                      onClick={() => openEditModal(ex)}
+                      className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
                     >
-                      Delete
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteExam(ex._id)}
+                      disabled={deleteLoadingId === ex._id}
+                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 disabled:opacity-50"
+                    >
+                      {deleteLoadingId === ex._id ? "Deleting..." : "Delete"}
                     </button>
                   </td>
                 </tr>
@@ -156,69 +204,85 @@ export default function Exams() {
           </table>
         </div>
       ) : selectedBatch ? (
-        <p className="text-center text-gray-500 py-4">
-          No exams found for this batch.
-        </p>
+        <p className="text-center text-gray-500 py-4">No exams found for this batch.</p>
       ) : null}
 
-      {/* Add Exam Form */}
-      {selectedBatch && (
-        <form
-          onSubmit={handleAddExam}
-          className="bg-white p-4 rounded-lg shadow-md space-y-4"
-        >
-          <h3 className="font-semibold text-lg">➕ Add New Exam</h3>
-          <div className="flex flex-col md:flex-row gap-3">
-            <input
-              type="text"
-              name="name"
-              placeholder="Exam Name"
-              value={examForm.name}
-              onChange={handleChange}
-              className="border rounded-lg p-2 flex-1 w-full"
-              required
-            />
-            <select
-              name="type"
-              value={examForm.type}
-              onChange={handleChange}
-              className="border rounded-lg p-2 flex-1 w-full"
-              required
-            >
-              <option value="">Select Exam Type</option>
-              {examTypes.map((t) => (
-                <option key={t} value={t}>
-                  {t.charAt(0).toUpperCase() + t.slice(1)}
-                </option>
-              ))}
-            </select>
+      {/* Add/Edit Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+            <h3 className="text-lg font-semibold mb-4 text-center">
+              {editingExam ? "✏️ Edit Exam" : "➕ Add Exam"}
+            </h3>
+            <form onSubmit={handleSaveExam} className="space-y-4">
+              <input
+                type="text"
+                name="name"
+                placeholder="Exam Name"
+                value={examForm.name}
+                onChange={handleChange}
+                className="border p-2 rounded w-full"
+                required
+              />
+              <select
+                name="type"
+                value={examForm.type}
+                onChange={handleChange}
+                className="border p-2 rounded w-full"
+                required
+              >
+                <option value="">Select Exam Type</option>
+                {examTypes.map((t) => (
+                  <option key={t} value={t}>
+                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="number"
+                name="totalMarks"
+                placeholder="Total Marks"
+                value={examForm.totalMarks}
+                onChange={handleChange}
+                className="border p-2 rounded w-full"
+                required
+              />
+              <textarea
+                name="description"
+                placeholder="Description (optional)"
+                value={examForm.description}
+                onChange={handleChange}
+                className="border p-2 rounded w-full"
+              />
+              <div className="flex justify-between gap-2">
+                <button
+                  type="submit"
+                  disabled={actionLoading}
+                  className={`flex-1 px-4 py-2 rounded text-white ${
+                    actionLoading
+                      ? "bg-blue-400 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
+                  }`}
+                >
+                  {actionLoading
+                    ? editingExam
+                      ? "Updating..."
+                      : "Adding..."
+                    : editingExam
+                    ? "Update Exam"
+                    : "Add Exam"}
+                </button>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="flex-1 px-4 py-2 rounded bg-gray-400 text-white hover:bg-gray-500"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
-          <div className="flex flex-col md:flex-row gap-3">
-            <input
-              type="number"
-              name="totalMarks"
-              placeholder="Total Marks"
-              value={examForm.totalMarks}
-              onChange={handleChange}
-              className="border rounded-lg p-2 flex-1 w-full"
-              required
-            />
-            <textarea
-              name="description"
-              placeholder="Description (optional)"
-              value={examForm.description}
-              onChange={handleChange}
-              className="border rounded-lg p-2 flex-1 w-full"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700"
-          >
-            {loading ? "Adding..." : "Add Exam"}
-          </button>
-        </form>
+        </div>
       )}
     </div>
   );

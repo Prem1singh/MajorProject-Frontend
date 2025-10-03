@@ -1,67 +1,27 @@
 // src/pages/announcements/Announcements.jsx
-import React, { useState } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 
-// Teacher Components
-import CreateAnnouncement from "./Teacher/CreateAnnouncement.jsx";
-import UpdateAnnouncement from "./Teacher/UpdateAnnouncement.jsx";
-import DeleteAnnouncement from "./Teacher/DeleteAnnouncement.jsx";
-
-// Shared / Student Components
-import ViewAnnouncements from "./Shared/ViewAnnouncements.jsx";
+// Teacher / Student Components
+import ViewAnnouncements from "./Teacher/ViewAnnouncements.jsx";
 import StudentAnnouncements from "./Student/StudentAnnouncements.jsx";
 
 export default function Announcements() {
   const user = useSelector((state) => state.user.data);
 
-  // If user is a student, directly render StudentAnnouncements
+  // If user is a student, show only student view
   if (user.role === "Student") {
     return <StudentAnnouncements />;
   }
 
-  // Default active tab for teachers
-  const [activeTab, setActiveTab] = useState("create");
-
-  const teacherOptions = [
-    { key: "create", label: "Create Announcement", component: <CreateAnnouncement /> },
-    { key: "all", label: "View All Announcements", component: <ViewAnnouncements /> },
-    { key: "update", label: "Update Announcement", component: <UpdateAnnouncement /> },
-    { key: "delete", label: "Delete Announcement", component: <DeleteAnnouncement /> },
-  ];
-
-  const renderContent = () => {
-    const selected = teacherOptions.find((opt) => opt.key === activeTab);
-    return selected ? selected.component : (
-      <div className="text-gray-500">Please select an announcements option.</div>
-    );
-  };
-
+  // If user is a teacher, show view announcements only
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
-      {/* Sidebar / Tabs */}
-      <aside className="bg-gray-100 border-b md:border-b-0 md:border-r p-4 md:min-w-[240px] flex-shrink-0">
-        <h2 className="text-lg font-semibold mb-4 md:mb-6 md:hidden">Announcement Options</h2>
-        <ul className="flex md:flex-col gap-2 overflow-x-auto md:overflow-x-visible md:overflow-y-auto">
-          {teacherOptions.map((opt) => (
-            <li key={opt.key}>
-              <button
-                onClick={() => setActiveTab(opt.key)}
-                className={`px-4 py-2 rounded-lg whitespace-nowrap w-full text-left transition font-medium text-sm md:text-base ${
-                  activeTab === opt.key
-                    ? "bg-blue-600 text-white shadow"
-                    : "bg-white hover:bg-gray-200"
-                }`}
-              >
-                {opt.label}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </aside>
 
-      {/* Main Content */}
       <main className="flex-1 p-4 md:p-6 overflow-auto">
-        <div className="max-w-5xl mx-auto">{renderContent()}</div>
+        <div className="max-w-5xl mx-auto">
+          <ViewAnnouncements />
+        </div>
       </main>
     </div>
   );

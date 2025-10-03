@@ -5,15 +5,21 @@ import { toast } from "react-toastify";
 export default function ManageDepartments() {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Popup form state
+  const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", code: "" });
   const [editingId, setEditingId] = useState(null);
   const [formLoading, setFormLoading] = useState(false);
 
-  // Pagination state
+  // Deleting state
+  const [deletingId, setDeletingId] = useState(null);
+
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // 🔍 Search
+  // Search
   const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch departments
@@ -21,7 +27,6 @@ export default function ManageDepartments() {
     try {
       setLoading(true);
       const res = await api.get("/admin/departments");
-      // ✅ Sort departments alphabetically by name
       const sorted = res.data.sort((a, b) => a.name.localeCompare(b.name));
       setDepartments(sorted);
     } catch (err) {
@@ -40,47 +45,53 @@ export default function ManageDepartments() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // Create or update department
+  // Submit (Add/Update)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormLoading(true);
     try {
       if (editingId) {
         await api.put(`/admin/department/${editingId}`, form);
-        toast.success("Updated Successfully");
+        toast.success("Department Updated Successfully");
       } else {
         await api.post("/admin/department", form);
-        toast.success("Added Successfully");
+        toast.success("Department Added Successfully");
       }
+      fetchDepartments();
+      setShowForm(false);
       setForm({ name: "", code: "" });
       setEditingId(null);
-      fetchDepartments();
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err.message || "Error saving department");
     } finally {
       setFormLoading(false);
     }
   };
 
-  // Edit department
+  // Edit department → open popup with pre-filled data
   const handleEdit = (dept) => {
     setForm({ name: dept.name, code: dept.code });
     setEditingId(dept._id);
+    setShowForm(true);
   };
 
   // Delete department
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this department?")) return;
+    if (!window.confirm("Are you sure you want to delete this department?"))
+      return;
     try {
+      setDeletingId(id);
       await api.delete(`/admin/department/${id}`);
       toast.success("Deleted Successfully");
       fetchDepartments();
     } catch (err) {
       toast.error("Delete Failed");
+    } finally {
+      setDeletingId(null);
     }
   };
 
-  // 🔍 Filter departments based on search term
+  // Filter by search
   const filteredDepartments = departments.filter((dept) => {
     const search = searchTerm.toLowerCase();
     return (
@@ -92,91 +103,42 @@ export default function ManageDepartments() {
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentDepartments = filteredDepartments.slice(indexOfFirstItem, indexOfLastItem);
+  const currentDepartments = filteredDepartments.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
   const totalPages = Math.ceil(filteredDepartments.length / itemsPerPage);
 
   return (
     <div className="p-6 bg-white rounded-xl shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">
-        Manage Departments
-      </h2>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <h2 className="text-2xl font-bold text-gray-800">Manage Departments</h2>
 
-      {/* 🔍 Search Bar + Form */}
-      <div className="mb-6 flex flex-col md:flex-row gap-4 items-start md:items-center">
-      
-        {/* Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1"
-        >
+        <div className="flex gap-2 flex-wrap">
           <input
             type="text"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            placeholder="Department Name"
-            className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-            required
-            disabled={formLoading}
+            placeholder="Search by name or code..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none w-64"
           />
-          <input
-            type="text"
-            name="code"
-            value={form.code}
-            onChange={handleChange}
-            placeholder="Department Code"
-            className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-            required
-            disabled={formLoading}
-          />
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={formLoading}
-              className={`px-5 py-2 rounded-lg transition text-white ${
-                formLoading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
-              }`}
-            >
-              {formLoading
-                ? editingId
-                  ? "Updating..."
-                  : "Adding..."
-                : editingId
-                ? "Update"
-                : "Add"}
-            </button>
-            {editingId && (
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingId(null);
-                  setForm({ name: "", code: "" });
-                }}
-                disabled={formLoading}
-                className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition"
-              >
-                Cancel
-              </button>
-            )}
-          </div>
-        </form>
-       
-        <input
-          type="text"
-          placeholder="Search by name or code..."
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1); // reset page on search
-          }}
-          className="border p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none w-full md:w-72"
-        />
-
+          <button
+            onClick={() => {
+              setShowForm(true);
+              setEditingId(null);
+              setForm({ name: "", code: "" });
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+          >
+            + Add Department
+          </button>
+        </div>
       </div>
 
-      {/* List */}
+      {/* Table */}
       {loading ? (
         <p className="text-gray-600">Loading departments...</p>
       ) : filteredDepartments.length === 0 ? (
@@ -206,15 +168,20 @@ export default function ManageDepartments() {
                   <td className="p-3 border text-center space-x-2">
                     <button
                       onClick={() => handleEdit(dept)}
-                      className="bg-yellow-500 w-[70px] hover:bg-yellow-600 text-white px-3 py-1 rounded-lg transition"
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-lg transition"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDelete(dept._id)}
-                      className="my-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg transition"
+                      disabled={deletingId === dept._id}
+                      className={`px-3 py-1 rounded-lg transition text-white ${
+                        deletingId === dept._id
+                          ? "bg-red-400 cursor-not-allowed"
+                          : "bg-red-600 hover:bg-red-700"
+                      }`}
                     >
-                      Delete
+                      {deletingId === dept._id ? "Deleting..." : "Delete"}
                     </button>
                   </td>
                 </tr>
@@ -241,6 +208,71 @@ export default function ManageDepartments() {
             >
               Next
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Popup Modal for Add/Edit */}
+      {showForm && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+            <h3 className="text-xl font-semibold mb-4 text-gray-800">
+              {editingId ? "Edit Department" : "Add Department"}
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm mb-1">Department Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  placeholder="Enter department name"
+                  className="w-full border rounded-lg p-2 focus:ring focus:ring-blue-300"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Department Code</label>
+                <input
+                  type="text"
+                  name="code"
+                  value={form.code}
+                  onChange={handleChange}
+                  placeholder="Enter department code"
+                  className="w-full border rounded-lg p-2 focus:ring focus:ring-blue-300"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingId(null);
+                    setForm({ name: "", code: "" });
+                  }}
+                  className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={formLoading}
+                  className={`bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg ${
+                    formLoading && "opacity-50 cursor-not-allowed"
+                  }`}
+                >
+                  {formLoading
+                    ? editingId
+                      ? "Updating..."
+                      : "Adding..."
+                    : editingId
+                    ? "Update"
+                    : "Add"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -14,9 +14,9 @@ export default function Aside({ closeSidebar }) {
     ],
     Teacher: [
       { name: "Dashboard", path: "/teacher/dashboard" },
-      { name: "Assignments", path: "/teacher/assignments" },
       { name: "Attendance", path: "/teacher/attendance" },
       { name: "Marks", path: "/teacher/marks" },
+      { name: "Assignments", path: "/teacher/assignments" },
       { name: "Announcement", path: "/teacher/announcement" },
       { name: "Study Material", path: "/teacher/study" },
       { name: "Performance", path: "/teacher/performance" },

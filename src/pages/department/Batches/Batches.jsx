@@ -8,6 +8,7 @@ export default function Batches() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [deleteLoadingId, setDeleteLoadingId] = useState(null);
 
   const [selectedCourse, setSelectedCourse] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,6 +23,7 @@ export default function Batches() {
     course: "",
   });
   const [editingBatch, setEditingBatch] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -55,7 +57,15 @@ export default function Batches() {
     fetchCourses();
   }, []);
 
-  const resetForm = () => {
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
+  };
+
+  const openAddModal = () => {
     setEditingBatch(null);
     setFormData({
       name: "",
@@ -66,20 +76,34 @@ export default function Batches() {
       dissertation: false,
       course: "",
     });
+    setIsModalOpen(true);
   };
 
-  const handleCourseFilter = (e) => {
-    const courseId = e.target.value;
-    setSelectedCourse(courseId);
-    resetForm();
-    fetchBatches(courseId);
-  };
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+  const openEditModal = (batch) => {
+    setEditingBatch(batch);
     setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
+      name: batch.name,
+      totalSem: batch.totalSem,
+      currentSem: batch.currentSem || "",
+      year: batch.year,
+      status: batch.status,
+      dissertation: batch.dissertation,
+      course: batch.course._id,
+    });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingBatch(null);
+    setFormData({
+      name: "",
+      totalSem: "",
+      currentSem: "",
+      year: "",
+      status: "Active",
+      dissertation: false,
+      course: "",
     });
   };
 
@@ -94,7 +118,7 @@ export default function Batches() {
         await api.post("/batches", formData);
         toast.success("Batch created successfully");
       }
-      resetForm();
+      closeModal();
       fetchBatches(selectedCourse);
     } catch (err) {
       console.error("Error saving batch:", err);
@@ -104,22 +128,9 @@ export default function Batches() {
     }
   };
 
-  const handleEdit = (batch) => {
-    setEditingBatch(batch);
-    setFormData({
-      name: batch.name,
-      totalSem: batch.totalSem,
-      currentSem: batch.currentSem || "",
-      year: batch.year,
-      status: batch.status,
-      dissertation: batch.dissertation,
-      course: batch.course._id,
-    });
-  };
-
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this batch?")) return;
-    setActionLoading(true);
+    setDeleteLoadingId(id);
     try {
       await api.delete(`/batches/${id}`);
       toast.success("Batch deleted successfully");
@@ -128,21 +139,27 @@ export default function Batches() {
       console.error("Error deleting batch:", err);
       toast.error(err.response?.data?.message || "Failed to delete batch");
     } finally {
-      setActionLoading(false);
+      setDeleteLoadingId(null);
     }
   };
 
-  // 🔍 Filter by search term (batch name or course name)
+  const handleCourseFilter = (e) => {
+    const courseId = e.target.value;
+    setSelectedCourse(courseId);
+    closeModal();
+    fetchBatches(courseId);
+  };
+
+  // Filter & Sort
   const filteredBatches = batches.filter(
     (b) =>
       b.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       b.course?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // 🔃 Sort by year descending (recent first)
   const sortedBatches = [...filteredBatches].sort((a, b) => b.year - a.year);
 
-  // Pagination logic
+  // Pagination
   const indexOfLastBatch = currentPage * batchesPerPage;
   const indexOfFirstBatch = indexOfLastBatch - batchesPerPage;
   const currentBatches = sortedBatches.slice(indexOfFirstBatch, indexOfLastBatch);
@@ -150,95 +167,16 @@ export default function Batches() {
 
   return (
     <div className="p-4 max-w-7xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-center md:text-left">📚 Batches</h2>
+      <div className="flex justify-between mb-1.5">
 
-
-
-      {/* Add/Edit Form */}
-      <form onSubmit={handleSubmit} className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-3">
-        <input
-          type="text"
-          name="name"
-          placeholder="Batch Name (e.g. BCA-2023)"
-          value={formData.name}
-          onChange={handleChange}
-          className="border p-2 rounded"
-          required
-        />
-        <input
-          type="number"
-          name="totalSem"
-          placeholder="Total Semesters"
-          value={formData.totalSem}
-          onChange={handleChange}
-          className="border p-2 rounded"
-          required
-        />
-        <select
-          name="currentSem"
-          value={formData.currentSem}
-          onChange={handleChange}
-          className="border p-2 rounded"
-          required
-          disabled={!formData.totalSem}
+     
+      <h2 className="md:text-2xl text-xl  font-bold mb-4 text-center md:text-left">📚 Batches</h2>
+      <button
+          onClick={openAddModal}
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
         >
-          <option value="">Select Current Semester</option>
-          {Array.from({ length: Number(formData.totalSem) || 0 }, (_, i) => i + 1).map((sem) => (
-            <option key={sem} value={sem}>
-              Semester {sem}
-            </option>
-          ))}
-        </select>
-        <input
-          type="number"
-          name="year"
-          placeholder="Admission Year"
-          value={formData.year}
-          onChange={handleChange}
-          className="border p-2 rounded"
-          required
-        />
-        <select name="status" value={formData.status} onChange={handleChange} className="border p-2 rounded">
-          <option value="Active">Active</option>
-          <option value="Completed">Completed</option>
-          <option value="Suspended">Suspended</option>
-        </select>
-        <label className="flex items-center gap-2">
-          <input type="checkbox" name="dissertation" checked={formData.dissertation} onChange={handleChange} />
-          Dissertation
-        </label>
-        <select name="course" value={formData.course} onChange={handleChange} className="border p-2 rounded" required>
-          <option value="">Select Course</option>
-          {courses.map((c) => (
-            <option key={c._id} value={c._id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-
-        <div className="col-span-1 md:col-span-2 flex gap-2">
-          <button
-            type="submit"
-            disabled={actionLoading}
-            className={`px-4 py-2 rounded text-white ${
-              actionLoading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-            }`}
-          >
-            {actionLoading ? (editingBatch ? "Updating..." : "Adding...") : editingBatch ? "Update" : "Add"} Batch
-          </button>
-          {editingBatch && (
-            <button
-              type="button"
-              onClick={resetForm}
-              disabled={actionLoading}
-              className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      </form>
-
+          ➕ Add Batch
+        </button> </div>
       {/* Filters */}
       <div className="mb-4 flex flex-col sm:flex-row gap-3 items-center">
         <label className="font-semibold">Filter by Course:</label>
@@ -261,11 +199,14 @@ export default function Batches() {
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
-            setCurrentPage(1); // reset page on search
+            setCurrentPage(1);
           }}
           className="border p-2 rounded flex-1 sm:flex-none sm:w-64"
         />
+
+        
       </div>
+
       {/* Batches Table */}
       {loading ? (
         <p className="text-center text-gray-500">Loading batches...</p>
@@ -302,7 +243,7 @@ export default function Batches() {
                     <td className="border p-2">{batch.course?.name || "-"}</td>
                     <td className="border p-2 flex justify-center gap-2">
                       <button
-                        onClick={() => handleEdit(batch)}
+                        onClick={() => openEditModal(batch)}
                         disabled={actionLoading}
                         className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 disabled:opacity-50"
                       >
@@ -310,10 +251,10 @@ export default function Batches() {
                       </button>
                       <button
                         onClick={() => handleDelete(batch._id)}
-                        disabled={actionLoading}
+                        disabled={deleteLoadingId === batch._id}
                         className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 disabled:opacity-50"
                       >
-                        {actionLoading ? "Deleting..." : "Delete"}
+                        {deleteLoadingId === batch._id ? "Deleting..." : "Delete"}
                       </button>
                     </td>
                   </tr>
@@ -347,6 +288,124 @@ export default function Batches() {
             >
               Next
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Add/Edit Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+            <h3 className="text-lg font-semibold mb-4 text-center">
+              {editingBatch ? "Edit Batch" : "Add Batch"}
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Batch Name (e.g. BCA-2023)"
+                className="w-full p-2 border rounded"
+                required
+                disabled={actionLoading}
+              />
+              <input
+                type="number"
+                name="totalSem"
+                value={formData.totalSem}
+                onChange={handleChange}
+                placeholder="Total Semesters"
+                className="w-full p-2 border rounded"
+                required
+                disabled={actionLoading}
+              />
+              <select
+                name="currentSem"
+                value={formData.currentSem}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+                required
+                disabled={!formData.totalSem || actionLoading}
+              >
+                <option value="">Select Current Semester</option>
+                {Array.from({ length: Number(formData.totalSem) || 0 }, (_, i) => i + 1).map((sem) => (
+                  <option key={sem} value={sem}>
+                    Semester {sem}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="number"
+                name="year"
+                value={formData.year}
+                onChange={handleChange}
+                placeholder="Admission Year"
+                className="w-full p-2 border rounded"
+                required
+                disabled={actionLoading}
+              />
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+                disabled={actionLoading}
+              >
+                <option value="Active">Active</option>
+                <option value="Completed">Completed</option>
+                <option value="Suspended">Suspended</option>
+              </select>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="dissertation"
+                  checked={formData.dissertation}
+                  onChange={handleChange}
+                  disabled={actionLoading}
+                />
+                Dissertation
+              </label>
+              <select
+                name="course"
+                value={formData.course}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+                required
+                disabled={actionLoading}
+              >
+                <option value="">Select Course</option>
+                {courses.map((c) => (
+                  <option key={c._id} value={c._id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              <div className="flex justify-between gap-2">
+                <button
+                  type="submit"
+                  disabled={actionLoading}
+                  className={`flex-1 px-4 py-2 rounded text-white ${
+                    actionLoading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                  }`}
+                >
+                  {actionLoading
+                    ? editingBatch
+                      ? "Updating..."
+                      : "Adding..."
+                    : editingBatch
+                    ? "Update Batch"
+                    : "Add Batch"}
+                </button>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="flex-1 px-4 py-2 rounded bg-gray-400 text-white hover:bg-gray-500"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

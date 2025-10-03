@@ -17,7 +17,6 @@ export default function DepartmentMarksViewer() {
   const [currentPage, setCurrentPage] = useState(1);
   const marksPerPage = 5;
 
-  console.log(marks)
   // Fetch batches on load
   useEffect(() => {
     const fetchBatches = async () => {

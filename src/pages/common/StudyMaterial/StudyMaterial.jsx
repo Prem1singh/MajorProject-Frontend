@@ -1,10 +1,8 @@
 // src/pages/studyMaterial/StudyMaterial.jsx
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 
-
 // Teacher Components
-import UploadMaterial from "./Teacher/UploadMaterial.jsx";
 import ViewTeacherMaterials from "./Teacher/ViewTeacherMaterials.jsx";
 
 // Student Components
@@ -13,53 +11,23 @@ import ViewStudentMaterials from "./Student/ViewStudentMaterials.jsx";
 export default function StudyMaterial() {
   const user = useSelector((state) => state.user.data);
 
-  // If user is a student, directly render Student view
+  // Student view
   if (user.role === "Student") {
-    return <ViewStudentMaterials />;
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+        <div className="max-w-5xl mx-auto">
+          <ViewStudentMaterials />
+        </div>
+      </div>
+    );
   }
 
-  // Teacher default tab
-  const [activeTab, setActiveTab] = useState("upload");
-
-  const teacherOptions = [
-    { key: "upload", label: "Upload Material", component: <UploadMaterial /> },
-    { key: "view", label: "View Materials", component: <ViewTeacherMaterials /> },
-  ];
-
-  const renderContent = () => {
-    const selected = teacherOptions.find((opt) => opt.key === activeTab);
-    return selected ? selected.component : (
-      <div className="text-gray-500">Please select an option.</div>
-    );
-  };
-
+  // Teacher view
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
-      {/* Sidebar / Tabs */}
-      <aside className="bg-gray-100 border-b md:border-b-0 md:border-r p-4 md:min-w-[220px] flex-shrink-0">
-        <h2 className="text-lg font-semibold mb-4 md:mb-6 md:hidden">Options</h2>
-        <ul className="flex md:flex-col gap-2 overflow-x-auto md:overflow-x-visible md:overflow-y-auto">
-          {teacherOptions.map((opt) => (
-            <li key={opt.key}>
-              <button
-                onClick={() => setActiveTab(opt.key)}
-                className={`px-4 py-2 rounded-lg whitespace-nowrap w-full text-left transition font-medium text-sm md:text-base ${
-                  activeTab === opt.key
-                    ? "bg-blue-600 text-white shadow"
-                    : "bg-white hover:bg-gray-200"
-                }`}
-              >
-                {opt.label}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 p-4 md:p-6 overflow-auto">
-        <div className="max-w-5xl mx-auto">{renderContent()}</div>
-      </main>
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+      <div className="max-w-5xl mx-auto">
+        <ViewTeacherMaterials />
+      </div>
     </div>
   );
 }

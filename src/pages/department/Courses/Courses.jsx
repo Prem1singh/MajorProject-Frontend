@@ -7,8 +7,11 @@ export default function Courses() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [deleteLoadingId, setDeleteLoadingId] = useState(null);
+
   const [formData, setFormData] = useState({ name: "", code: "" });
   const [editingCourse, setEditingCourse] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,13 +41,25 @@ export default function Courses() {
     fetchCourses();
   }, []);
 
-  // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const resetForm = () => {
+  const openAddModal = () => {
+    setEditingCourse(null);
+    setFormData({ name: "", code: "" });
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (course) => {
+    setEditingCourse(course);
+    setFormData({ name: course.name, code: course.code });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
     setEditingCourse(null);
     setFormData({ name: "", code: "" });
   };
@@ -60,7 +75,7 @@ export default function Courses() {
         await api.post("/courses", formData);
         toast.success("Course added successfully");
       }
-      resetForm();
+      closeModal();
       fetchCourses();
     } catch (err) {
       console.error("Error saving course:", err);
@@ -70,14 +85,9 @@ export default function Courses() {
     }
   };
 
-  const handleEdit = (course) => {
-    setEditingCourse(course);
-    setFormData({ name: course.name, code: course.code });
-  };
-
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this course?")) return;
-    setActionLoading(true);
+    setDeleteLoadingId(id);
     try {
       await api.delete(`/courses/${id}`);
       toast.success("Course deleted successfully");
@@ -86,22 +96,20 @@ export default function Courses() {
       console.error("Error deleting course:", err);
       toast.error(err.response?.data?.message || "Failed to delete course");
     } finally {
-      setActionLoading(false);
+      setDeleteLoadingId(null);
     }
   };
 
-  // 🔍 Filter by search
+  // Filter & Sort
   const filteredCourses = courses.filter(
     (c) =>
       c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // 🔃 Sort by name
-  const sortedCourses = [...filteredCourses].sort((a, b) => {
-    if (sortAsc) return a.name.localeCompare(b.name);
-    else return b.name.localeCompare(a.name);
-  });
+  const sortedCourses = [...filteredCourses].sort((a, b) =>
+    sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
+  );
 
   // Pagination
   const indexOfLastCourse = currentPage * coursesPerPage;
@@ -109,70 +117,30 @@ export default function Courses() {
   const currentCourses = sortedCourses.slice(indexOfFirstCourse, indexOfLastCourse);
   const totalPages = Math.ceil(sortedCourses.length / coursesPerPage);
 
+  if (loading) return <p className="text-center py-4">Loading courses...</p>;
+
   return (
     <div className="p-4 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-center md:text-left">🎓 Courses</h2>
-
-      {/* Form */}
-      <form className="mb-6 flex flex-col md:flex-row gap-3 items-center" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Course Name"
-          value={formData.name}
-          onChange={handleChange}
-          className="border p-2 rounded flex-1 w-full md:w-auto"
-          required
-          disabled={actionLoading}
-        />
-        <input
-          type="text"
-          name="code"
-          placeholder="Course Code"
-          value={formData.code}
-          onChange={handleChange}
-          className="border p-2 rounded flex-1 w-full md:w-auto"
-          required
-          disabled={actionLoading}
-        />
-        <button
-          type="submit"
-          disabled={actionLoading}
-          className={`${
-            actionLoading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-          } text-white px-4 py-2 rounded`}
-        >
-          {editingCourse
-            ? actionLoading
-              ? "Updating..."
-              : "Update Course"
-            : actionLoading
-            ? "Adding..."
-            : "Add Course"}
-        </button>
-        {editingCourse && (
-          <button
-            type="button"
-            onClick={resetForm}
-            disabled={actionLoading}
-            className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
+      <div className="flex justify-between mb-1.5">
+      <h2 className="md:text-2xl text-xl font-bold mb-4 text-center md:text-left">🎓 Courses</h2>
+      <button
+          onClick={openAddModal}
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
           >
-            Cancel
-          </button>
-        )}
-      </form>
-
-      {/* Search & Sort */}
-      <div className="mb-4 flex flex-col sm:flex-row gap-3 items-center">
+            ➕ Add Course
+        </button>
+        </div>
+      {/* Top Controls */}
+      <div className="flex flex-col sm:flex-row gap-3 items-center mb-4">
         <input
           type="text"
           placeholder="Search by name or code..."
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
-            setCurrentPage(1); // reset page on search
+            setCurrentPage(1);
           }}
-          className="border p-2 rounded flex-1"
+          className="border p-2 rounded flex-1 w-full sm:w-auto"
         />
         <button
           onClick={() => setSortAsc(!sortAsc)}
@@ -180,6 +148,7 @@ export default function Courses() {
         >
           Sort by Name {sortAsc ? "↑" : "↓"}
         </button>
+       
       </div>
 
       {/* Courses Table */}
@@ -205,7 +174,7 @@ export default function Courses() {
                   <td className="border p-2">{course.code}</td>
                   <td className="border p-2 flex justify-center gap-2">
                     <button
-                      onClick={() => handleEdit(course)}
+                      onClick={() => openEditModal(course)}
                       disabled={actionLoading}
                       className={`${
                         actionLoading
@@ -217,14 +186,14 @@ export default function Courses() {
                     </button>
                     <button
                       onClick={() => handleDelete(course._id)}
-                      disabled={actionLoading}
+                      disabled={deleteLoadingId === course._id}
                       className={`${
-                        actionLoading
+                        deleteLoadingId === course._id
                           ? "bg-red-400 cursor-not-allowed"
                           : "bg-red-600 hover:bg-red-700"
                       } text-white px-2 py-1 rounded`}
                     >
-                      Delete
+                      {deleteLoadingId === course._id ? "Deleting..." : "Delete"}
                     </button>
                   </td>
                 </tr>
@@ -238,8 +207,10 @@ export default function Courses() {
             )}
           </tbody>
         </table>
+      </div>
 
-        {/* Pagination */}
+      {/* Pagination */}
+      {totalPages > 1 && (
         <div className="flex justify-center items-center gap-4 mt-4">
           <button
             className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
@@ -259,7 +230,64 @@ export default function Courses() {
             Next
           </button>
         </div>
-      </div>
+      )}
+
+      {/* Add/Edit Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+            <h3 className="text-lg font-semibold mb-4 text-center">
+              {editingCourse ? "Edit Course" : "Add Course"}
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Course Name"
+                className="w-full p-2 border rounded"
+                required
+                disabled={actionLoading}
+              />
+              <input
+                type="text"
+                name="code"
+                value={formData.code}
+                onChange={handleChange}
+                placeholder="Course Code"
+                className="w-full p-2 border rounded"
+                required
+                disabled={actionLoading}
+              />
+              <div className="flex justify-between gap-2">
+                <button
+                  type="submit"
+                  disabled={actionLoading}
+                  className={`flex-1 px-4 py-2 rounded text-white ${
+                    actionLoading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+                  }`}
+                >
+                  {actionLoading
+                    ? editingCourse
+                      ? "Updating..."
+                      : "Adding..."
+                    : editingCourse
+                    ? "Update Course"
+                    : "Add Course"}
+                </button>
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="flex-1 px-4 py-2 rounded bg-gray-400 text-white hover:bg-gray-500"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

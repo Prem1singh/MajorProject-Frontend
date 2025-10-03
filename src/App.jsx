@@ -13,7 +13,6 @@ import ForgetPassword from "./components/ForgetPassword"
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import TeacherDashboard from "./pages/teacher/TeacherDashboard";
-import DepartmentDashboard from "./pages/department/DepartmentDashboard";
 import StudentDashboard from "./pages/student/StudentDashboard";
 
 import Assignments from "./pages/common/Assignments/Assignments";

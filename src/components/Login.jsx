@@ -11,7 +11,8 @@ export default function LoginPage() {
   const [showModal, setShowModal] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [msg, setMsg] = useState("");
-  const [loadingLogin, setLoadingLogin] = useState(false); // 🔹 added
+  const [loadingLogin, setLoadingLogin] = useState(false); // 🔹 login loader
+  const [loadingForgot, setLoadingForgot] = useState(false); // 🔹 forgot loader
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setMsg("");
-    setLoadingLogin(true); // 🔹 start loading
+    setLoadingLogin(true);
     try {
       api
         .post("/users/login", { email, password })
@@ -59,7 +60,7 @@ export default function LoginPage() {
           toast.error("Unable to login");
           setMsg("Login failed");
         })
-        .finally(() => setLoadingLogin(false)); // 🔹 stop loading
+        .finally(() => setLoadingLogin(false));
     } catch (error) {
       setMsg("Login failed.");
       setLoadingLogin(false);
@@ -69,13 +70,21 @@ export default function LoginPage() {
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     setMsg("");
+    setLoadingForgot(true); // 🔹 start loader
     try {
-      api.post("auth/request-reset", { email: forgotEmail }).then(() => {
-        setShowModal(false);
-        toast.success("Reset link sent to your email");
-      });
+      api
+        .post("auth/request-reset", { email: forgotEmail })
+        .then(() => {
+          setShowModal(false);
+          toast.success("Reset link sent to your email");
+        })
+        .catch(() => {
+          toast.error("Unable to send reset link");
+        })
+        .finally(() => setLoadingForgot(false)); // 🔹 stop loader
     } catch (error) {
       setMsg("Unable to send reset link.");
+      setLoadingForgot(false);
     }
   };
 
@@ -98,7 +107,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              disabled={loadingLogin} // 🔹 disable when loading
+              disabled={loadingLogin}
             />
           </div>
           <div>
@@ -110,12 +119,12 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              disabled={loadingLogin} // 🔹 disable when loading
+              disabled={loadingLogin}
             />
           </div>
           <button
             type="submit"
-            disabled={loadingLogin} // 🔹 disable button
+            disabled={loadingLogin}
             className={`cursor-pointer w-full py-2 px-4 rounded-lg transition ${
               loadingLogin
                 ? "bg-gray-400 cursor-not-allowed"
@@ -152,20 +161,53 @@ export default function LoginPage() {
                 value={forgotEmail}
                 onChange={(e) => setForgotEmail(e.target.value)}
                 required
+                disabled={loadingForgot}
               />
               <div className="flex justify-end space-x-2">
                 <button
                   type="button"
                   className="px-3 py-1 bg-gray-200 rounded-lg hover:bg-gray-300"
                   onClick={() => setShowModal(false)}
+                  disabled={loadingForgot}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  disabled={loadingForgot}
+                  className={`px-3 py-1 rounded-lg transition ${
+                    loadingForgot
+                      ? "bg-gray-400 cursor-not-allowed text-white"
+                      : "bg-blue-600 hover:bg-blue-700 text-white"
+                  }`}
                 >
-                  Submit
+                  {loadingForgot ? (
+                    <span className="flex items-center gap-2">
+                      <svg
+                        className="animate-spin h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        ></path>
+                      </svg>
+                      Sending...
+                    </span>
+                  ) : (
+                    "Submit"
+                  )}
                 </button>
               </div>
             </form>
