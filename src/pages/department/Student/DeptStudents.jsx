@@ -48,12 +48,12 @@ export default function StudentCRUD() {
   // Fetch students (with batch filter)
   const fetchStudents = async (batchId = "all") => {
     try {
-     
+      console.log(batchId)
       setLoading(true);
       let url = "/departmentAdmin/students";
       if (batchId !== "all") url += `?batch=${batchId}`;
       const res = await api.get(url);
-      
+      console.log(res.data)
       setStudents(res.data || []);
     } catch (err) {
       console.error(err);
