@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import api from "../../../../utils/axiosInstance";
+import { toast } from "react-toastify";
 
 
 export default function BatchPerformance() {
@@ -53,7 +54,7 @@ export default function BatchPerformance() {
 
   // Fetch batch performance
   const fetchPerformance = async () => {
-    if (!selectedBatch) return alert("Select a batch first.");
+    if (!selectedBatch) return toast.error("Select a batch first.");
     setLoading(true);
     try {
       let url = `/performance/department/batch?batch=${selectedBatch}`;
@@ -62,7 +63,7 @@ export default function BatchPerformance() {
       setPerformance(res.data);
     } catch (err) {
       console.error(err);
-      alert("Failed to fetch performance.");
+      toast.error("Failed to fetch performance.");
     } finally {
       setLoading(false);
     }

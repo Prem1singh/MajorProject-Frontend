@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import api from "../../../../utils/axiosInstance";
+import { toast } from "react-toastify";
 
 export default function UpdateAttendance() {
   const user = useSelector((state) => state.user.data);
@@ -69,7 +70,7 @@ export default function UpdateAttendance() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!attendanceRecords.length) {
-      alert("No attendance records to update");
+      toast.error("No attendance records to update");
       return;
     }
 
@@ -80,10 +81,10 @@ export default function UpdateAttendance() {
           api.put(`/attendance/${record._id}`, { status: attendanceMap[record._id] })
         )
       );
-      alert("Attendance updated successfully!");
+      toast.success("Attendance updated successfully!");
     } catch (err) {
       console.error("Error updating attendance:", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Failed to update attendance");
+      toast.error(err.response?.data?.message || "Failed to update attendance");
     } finally {
       setLoading(false);
     }

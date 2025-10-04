@@ -85,7 +85,7 @@ export default function TeacherMaterialsManager() {
   // Handle upload / update
   const handleSave = async () => {
     if (!title || !formSubject || (!file && !editingMaterial)) {
-      return alert("Please fill all required fields");
+      return toast.error("Please fill all required fields");
     }
 
     const formData = new FormData();
@@ -125,10 +125,10 @@ export default function TeacherMaterialsManager() {
     try {
       await api.delete(`/study/${id}`);
       setMaterials(materials.filter((m) => m._id !== id));
-      alert("Material deleted successfully");
+      toast.success("Material deleted successfully");
     } catch (err) {
       console.error(err);
-      alert("Failed to delete material");
+      toast.error("Failed to delete material");
     } finally {
       setLoadingDeleteId(null);
     }
@@ -155,7 +155,7 @@ export default function TeacherMaterialsManager() {
           onClick={openUploadModal}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
         >
-          + Upload Material
+          + Upload 
         </button>
         </div>
       {/* Controls */}

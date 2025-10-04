@@ -148,13 +148,15 @@ export default function AnnouncementsManager() {
   return (
     <div className="max-w-5xl mx-auto p-6">
       <div className="flex justify-between mb-1.5">
+        <div className="flex justify-between w-full">
       <h2 className="md:text-2xl text-xl font-bold mb-4"> Announcements</h2>
       <button
             onClick={() => openModal()}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
           >
-            + Add Announcement
+            + Add 
           </button>
+          </div>
           </div>
       {/* Subject Filter + Add Button */}
       <div className="mb-4 flex flex-col lg:flex-row gap-3 items-start lg:items-center justify-between">

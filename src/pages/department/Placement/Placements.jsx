@@ -148,7 +148,7 @@ export default function AdminPlacements() {
       <h1 className="md:text-2xl text-xl font-bold text-gray-800"> Placements</h1>
       <button
           onClick={openAddModal}
-          className="bg-green-600 text-white md:px-4 px-1 md:py-2 py-1 rounded hover:bg-green-700"
+          className="bg-green-600 text-white md:px-4 px-3 md:py-2 py-1 rounded hover:bg-green-700"
         >
           ➕ Add Placement
         </button>

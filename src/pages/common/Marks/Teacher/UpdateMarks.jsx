@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import api from "../../../../utils/axiosInstance";
+import { toast } from "react-toastify";
 
 export default function UpdateMarks() {
   const user = useSelector((state) => state.user.data);
@@ -90,7 +91,7 @@ export default function UpdateMarks() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedExam || !students.length) {
-      alert("No data to update");
+      toast.error("No data to update");
       return;
     }
 
@@ -106,10 +107,10 @@ export default function UpdateMarks() {
     setLoading(true);
     try {
       await api.post("/marks", { records });
-      alert("Marks updated successfully!");
+      toast.success("Marks updated successfully!");
     } catch (err) {
       console.error("Error updating marks:", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Failed to update marks");
+      toast.error(err.response?.data?.message || "Failed to update marks");
     } finally {
       setLoading(false);
     }

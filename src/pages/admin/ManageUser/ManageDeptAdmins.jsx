@@ -123,20 +123,11 @@ export default function ManageDeptAdmin() {
     <div className="p-4 sm:p-6 space-y-6">
       {/* Header + Search */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-semibold text-gray-700">
-          Manage Department Admins
+        <div className="flex justify-between w-full">
+        <h2 className="md:text-2xl text-xl font-semibold text-gray-700">
+           Department Admins
         </h2>
-
-        <div className="flex gap-2 flex-wrap">
-          <input
-            type="text"
-            placeholder="Search by name, email, department..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="border p-2 rounded-lg w-full sm:w-64 focus:ring focus:ring-blue-300"
-          />
-
-          <button
+        <button
             onClick={() => {
               setShowForm(true);
               setEditId(null);
@@ -149,8 +140,19 @@ export default function ManageDeptAdmin() {
             }}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
           >
-            <FaPlus /> Add Admin
+            <FaPlus /> Add 
           </button>
+          </div>
+        <div className="flex gap-2 flex-wrap">
+          <input
+            type="text"
+            placeholder="Search by name, email, department..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="border p-2 rounded-lg w-full sm:w-64 focus:ring focus:ring-blue-300"
+          />
+
+         
         </div>
       </div>
 

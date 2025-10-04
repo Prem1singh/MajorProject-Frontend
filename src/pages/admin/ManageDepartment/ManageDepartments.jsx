@@ -112,8 +112,19 @@ export default function ManageDepartments() {
   return (
     <div className="p-6 bg-white rounded-xl shadow-md">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h2 className="text-2xl font-bold text-gray-800">Manage Departments</h2>
-
+        <div className="flex justify-between w-full">
+        <h2 className="text-2xl font-bold text-gray-800"> Departments</h2>
+        <button
+            onClick={() => {
+              setShowForm(true);
+              setEditingId(null);
+              setForm({ name: "", code: "" });
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+          >
+            + Add 
+          </button>
+          </div>
         <div className="flex gap-2 flex-wrap">
           <input
             type="text"
@@ -125,16 +136,7 @@ export default function ManageDepartments() {
             }}
             className="border p-2 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none w-64"
           />
-          <button
-            onClick={() => {
-              setShowForm(true);
-              setEditingId(null);
-              setForm({ name: "", code: "" });
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-          >
-            + Add Department
-          </button>
+         
         </div>
       </div>
 

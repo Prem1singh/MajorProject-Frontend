@@ -67,7 +67,7 @@ export default function ManageTeachers() {
 
   return (
     <div className="p-4 sm:p-6 bg-white rounded-xl shadow-md space-y-6">
-      <h2 className="text-2xl font-bold text-gray-800">Manage Teachers</h2>
+      <h2 className="md:text-2xl text-xl font-bold text-gray-800"> Teachers</h2>
 
       {/* Department Select + Search */}
       <div className="bg-gray-50 p-4 rounded-lg shadow-sm space-y-4">

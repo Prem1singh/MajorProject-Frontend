@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import api from "../../../../utils/axiosInstance";
+import { toast } from "react-toastify";
 
 export default function MarkMarks() {
   const user = useSelector((state) => state.user.data);
@@ -80,11 +81,11 @@ export default function MarkMarks() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!subject || !exam) {
-      alert("Please select subject and exam");
+      toast.error("Please select subject and exam");
       return;
     }
     if (!students.length) {
-      alert("No students found");
+      toast.error("No students found");
       return;
     }
 
@@ -99,7 +100,7 @@ export default function MarkMarks() {
     setLoading(true);
     try {
       await api.post("/marks", { records });
-      alert("Marks submitted successfully!");
+      toast.success("Marks submitted successfully!");
       // Reset all states
       setSubject("");
       setExam("");
@@ -108,7 +109,7 @@ export default function MarkMarks() {
       setExamsForSubject([]);
     } catch (err) {
       console.error("Error submitting marks:", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Failed to submit marks");
+      toast.error(err.response?.data?.message || "Failed to submit marks");
     } finally {
       setLoading(false);
     }

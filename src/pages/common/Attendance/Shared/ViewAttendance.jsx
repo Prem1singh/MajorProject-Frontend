@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import api from "../../../../utils/axiosInstance";
+import { toast } from "react-toastify";
 
 export default function ViewAttendance() {
   const user = useSelector((state) => state.user.data);
@@ -36,7 +37,7 @@ export default function ViewAttendance() {
 
   const fetchAttendance = async () => {
     if (!subject) {
-      alert("Please select a subject");
+      toast.error("Please select a subject");
       return;
     }
 

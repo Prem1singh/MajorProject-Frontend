@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import api from "../../../../utils/axiosInstance";
+import { toast } from "react-toastify";
 
 export default function DeleteMarks() {
   const user = useSelector((state) => state.user.data);
@@ -51,7 +52,7 @@ export default function DeleteMarks() {
     e.preventDefault();
 
     if (!subject || !selectedExam) {
-      alert("Please select both subject and exam");
+      toast.error("Please select both subject and exam");
       return;
     }
 
@@ -62,11 +63,11 @@ export default function DeleteMarks() {
       await api.delete("/marks", {
         params: { subject, exam: selectedExam },
       });
-      alert("Marks deleted successfully!");
+      toast.success("Marks deleted successfully!");
       setSelectedExam("");
     } catch (err) {
       console.error("Error deleting marks:", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Failed to delete marks");
+      toast.error(err.response?.data?.message || "Failed to delete marks");
     } finally {
       setLoading(false);
     }

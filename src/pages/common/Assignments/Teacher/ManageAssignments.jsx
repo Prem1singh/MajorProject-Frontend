@@ -1,6 +1,7 @@
 // src/pages/assignments/TeacherAssignments.jsx
 import React, { useEffect, useState } from "react";
 import api from "../../../../utils/axiosInstance";
+import { toast } from "react-toastify";
 
 export default function TeacherAssignments() {
   const [assignments, setAssignments] = useState([]);
@@ -37,7 +38,7 @@ export default function TeacherAssignments() {
       setAssignments(res.data.assignments || []);
     } catch (err) {
       console.error(err);
-      alert("Failed to fetch assignments");
+      toast.error("Failed to fetch assignments");
     } finally {
       setLoading(false);
     }
@@ -99,19 +100,19 @@ export default function TeacherAssignments() {
         await api.put(`/assignments/${editingAssignment._id}`, fd, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-        alert("Assignment updated successfully!");
+        toast.success("Assignment updated successfully!");
       } else {
         await api.post("/assignments", fd, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-        alert("Assignment created successfully!");
+        toast.success("Assignment created successfully!");
       }
 
       fetchAssignments();
       setModalOpen(false);
     } catch (err) {
       console.error(err);
-      alert("Failed to save assignment");
+      toast.error("Failed to save assignment");
     } finally {
       setSubmitting(false);
     }
@@ -124,7 +125,7 @@ export default function TeacherAssignments() {
       setAssignments(assignments.filter((a) => a._id !== id));
     } catch (err) {
       console.error(err);
-      alert("Failed to delete assignment");
+      toast.error("Failed to delete assignment");
     }
   };
 
@@ -137,7 +138,7 @@ export default function TeacherAssignments() {
       setSearchTerm("");
     } catch (err) {
       console.error(err);
-      alert("Failed to fetch submissions");
+      toast.error("Failed to fetch submissions");
     }
   };
 
@@ -150,7 +151,7 @@ export default function TeacherAssignments() {
       fetchSubmissions(selectedAssignment);
     } catch (err) {
       console.error(err);
-      alert("Failed to update submission");
+      toast.error("Failed to update submission");
     }
   };
 
@@ -178,15 +179,16 @@ export default function TeacherAssignments() {
     <div className="p-4 sm:p-6 min-h-screen bg-gray-50">
       {/* Header + Create Button */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+        <div className="flex justify-between w-full">
         <h2 className="text-2xl font-bold text-gray-800">Assignments</h2>
         <button
           onClick={() => openModal()}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
         >
-          + Create Assignment
+          + Create
         </button>
       </div>
-
+      </div>
       {/* 🔹 Filters */}
       {!viewingSubmissions && (
         <div className="flex flex-col sm:flex-row gap-4 mb-6">

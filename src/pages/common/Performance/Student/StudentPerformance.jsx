@@ -34,7 +34,7 @@ export default function StudentPerformance() {
     fetchPerformance();
   }, []);
 
-  if (loading) return <p>Loading performance...</p>;
+  if (loading) return <p className="text-center p-4">Loading performance...</p>;
   if (!performance) return <p>No performance data available.</p>;
 
   return (

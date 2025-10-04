@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../../../utils/axiosInstance";
+import { toast } from "react-toastify";
 
 export default function DepartmentMarksViewer() {
   const [batches, setBatches] = useState([]);
@@ -47,8 +48,8 @@ export default function DepartmentMarksViewer() {
   }, [selectedBatch]);
 
   const fetchMarks = async () => {
-    if (viewBy === "student" && !selectedStudent) return alert("Select a student");
-    if (viewBy === "subject" && !selectedSubject) return alert("Select a subject");
+    if (viewBy === "student" && !selectedStudent) return toast.error("Select a student");
+    if (viewBy === "subject" && !selectedSubject) return toast.error("Select a subject");
 
     setLoading(true);
     try {
@@ -62,7 +63,7 @@ export default function DepartmentMarksViewer() {
       setCurrentPage(1);
     } catch (err) {
       console.error(err);
-      alert("Failed to fetch marks");
+      toast.error("Failed to fetch marks");
     } finally {
       setLoading(false);
     }

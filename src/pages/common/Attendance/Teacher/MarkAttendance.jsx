@@ -1,6 +1,7 @@
 // src/pages/attendance/Teacher/MarkAttendance.jsx
 import React, { useEffect, useState } from "react";
 import api from "../../../../utils/axiosInstance";
+import { toast } from "react-toastify";
 
 export default function MarkAttendance() {
   const [subjectsForTeacher, setSubjectsForTeacher] = useState([]);
@@ -62,12 +63,12 @@ export default function MarkAttendance() {
     e.preventDefault();
 
     if (!subject || !date) {
-      alert("Please select subject and date");
+      toast.error("Please select subject and date");
       return;
     }
 
     if (students.length === 0) {
-      alert("No students found for this subject");
+      toast.error("No students found for this subject");
       return;
     }
 
@@ -81,14 +82,14 @@ export default function MarkAttendance() {
     setLoading(true);
     try {
       await api.post("/attendance", { records });
-      alert("Attendance marked successfully!");
+      toast.success("Attendance marked successfully!");
       setSubject("");
       setDate("");
       setStudents([]);
       setAttendanceMap({});
     } catch (err) {
       console.error("Error marking attendance:", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Failed to mark attendance");
+      toast.error(err.response?.data?.message || "Failed to mark attendance");
     } finally {
       setLoading(false);
     }

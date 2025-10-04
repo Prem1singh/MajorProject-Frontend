@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../../utils/axiosInstance";
+import { toast } from "react-toastify";
 
 export default function StudentDoubtForum() {
   const [doubts, setDoubts] = useState([]);
@@ -27,14 +28,14 @@ export default function StudentDoubtForum() {
 
   // Post new doubt
   const handlePostDoubt = async () => {
-    if (!newDoubt.trim()) return alert("Please enter your doubt.");
+    if (!newDoubt.trim()) return toast.error("Please enter your doubt.");
     try {
       await api.post("/doubts", { question: newDoubt });
       setNewDoubt("");
       fetchDoubts();
     } catch (err) {
       console.error(err);
-      alert("Failed to post doubt.");
+      toast.error("Failed to post doubt.");
     }
   };
 
@@ -46,7 +47,7 @@ export default function StudentDoubtForum() {
       fetchDoubts();
     } catch (err) {
       console.error(err);
-      alert("Failed to post answer.");
+      toast.error("Failed to post answer.");
     }
   };
 
@@ -58,7 +59,7 @@ export default function StudentDoubtForum() {
       fetchDoubts();
     } catch (err) {
       console.error(err);
-      alert("Failed to delete doubt.");
+      toast.error("Failed to delete doubt.");
     }
   };
 
@@ -70,7 +71,7 @@ export default function StudentDoubtForum() {
       fetchDoubts();
     } catch (err) {
       console.error(err);
-      alert("Failed to delete answer.");
+      toast.error("Failed to delete answer.");
     }
   };
 

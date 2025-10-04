@@ -131,7 +131,7 @@ export default function Teachers() {
   const indexOfFirst = indexOfLast - teachersPerPage;
   const currentTeachers = filteredTeachers.slice(indexOfFirst, indexOfLast);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p className="text-center p-3">Loading...</p>;
 
   return (
     <div className="p-4 md:p-6">
@@ -141,7 +141,7 @@ export default function Teachers() {
         </h2>
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="bg-green-600 text-white md:px-4 md:py-2 px-1 py-1 rounded hover:bg-green-700"
+          className="bg-green-600 text-white md:px-4 md:py-2 px-3 py-1 rounded hover:bg-green-700"
         >
           ➕ Add Teacher
         </button>

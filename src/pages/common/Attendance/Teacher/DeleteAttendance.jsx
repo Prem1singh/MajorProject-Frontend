@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import api from "../../../../utils/axiosInstance";
+import { toast } from "react-toastify";
 
 export default function DeleteAttendance() {
   const user = useSelector((state) => state.user.data);
@@ -29,7 +30,7 @@ export default function DeleteAttendance() {
     e.preventDefault();
 
     if (!subject || !date) {
-      alert("Please select subject and date.");
+      toast.error("Please select subject and date.");
       return;
     }
 
@@ -38,12 +39,12 @@ export default function DeleteAttendance() {
     setLoading(true);
     try {
       const res = await api.delete(`/attendance?subject=${subject}&date=${date}`);
-      alert(res.data.message || "Attendance deleted successfully!");
+      toast.success(res.data.message || "Attendance deleted successfully!");
       setSubject("");
       setDate("");
     } catch (err) {
       console.error("Error deleting attendance:", err.response?.data || err.message);
-      alert(err.response?.data?.message || "Failed to delete attendance");
+      toast.error(err.response?.data?.message || "Failed to delete attendance");
     } finally {
       setLoading(false);
     }

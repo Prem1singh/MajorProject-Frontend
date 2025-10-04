@@ -171,9 +171,23 @@ export default function StudentCRUD() {
   return (
     <div className="p-4 max-w-6xl mx-auto space-y-6">
       <div className="flex justify-between flex-col sm:flex-row gap-3">
+        <div className="flex w-full justify-between">
         <h2 className="md:text-2xl text-xl font-semibold">Students</h2>
 
-        {/* ⭐ Batch Filter */}
+
+        {/* Add Student Button */}
+        <button
+          onClick={() => setAddModalOpen(true)}
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        >
+          ➕ Add Student
+        </button>
+      </div></div>
+
+      {/* Students Table */}
+      <div className="overflow-x-auto">
+        <div className="flex flex-col sm:flex-row gap-4 items-center my-4">
+           {/* ⭐ Batch Filter */}
         <select
           value={selectedBatchFilter}
           onChange={(e) => setSelectedBatchFilter(e.target.value)}
@@ -186,19 +200,6 @@ export default function StudentCRUD() {
             </option>
           ))}
         </select>
-
-        {/* Add Student Button */}
-        <button
-          onClick={() => setAddModalOpen(true)}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-        >
-          ➕ Add Student
-        </button>
-      </div>
-
-      {/* Students Table */}
-      <div className="overflow-x-auto">
-        <div className="flex flex-col sm:flex-row gap-4 items-center my-4">
           <input
             type="text"
             placeholder="Search students..."

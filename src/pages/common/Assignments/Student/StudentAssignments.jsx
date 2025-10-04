@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import api from "../../../../utils/axiosInstance";
+import { toast } from "react-toastify";
 
 export default function StudentAssignmentsView() {
   const user = useSelector((state) => state.user.data);
@@ -50,7 +51,7 @@ export default function StudentAssignmentsView() {
   const handleSubmit = async (e, assignmentId) => {
     e.preventDefault();
     const file = fileMap[assignmentId];
-    if (!file) return alert("Please select a file before submitting.");
+    if (!file) return toast.error("Please select a file before submitting.");
 
     const formData = new FormData();
     formData.append("file", file);
@@ -60,7 +61,7 @@ export default function StudentAssignmentsView() {
       await api.post(`/assignments/${assignmentId}/submit`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      alert("Submitted successfully!");
+      toast.success("Submitted successfully!");
       setFileMap((prev) => ({ ...prev, [assignmentId]: null }));
 
       // Refresh assignments
@@ -69,7 +70,7 @@ export default function StudentAssignmentsView() {
       setSubmitted(res.data.submitted || []);
     } catch (err) {
       console.error("Error submitting assignment", err);
-      alert("Failed to submit assignment.");
+      toast.error("Failed to submit assignment.");
     } finally {
       setSubmittingId(null);
     }
