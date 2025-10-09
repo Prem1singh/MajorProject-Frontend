@@ -91,7 +91,7 @@ export default function ManageStudents() {
   const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
   const currentStudents = filteredStudents.slice(indexOfFirstStudent, indexOfLastStudent);
   const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
-  console.log(students)
+
   return (
     <div className="p-4 sm:p-6 bg-white shadow-md rounded-xl space-y-6">
       <h2 className="md:text-2xl text-xl font-bold text-gray-800">Manage Students</h2>

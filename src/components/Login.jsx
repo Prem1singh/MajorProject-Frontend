@@ -33,7 +33,7 @@ export default function LoginPage() {
       api
         .post("/users/login", { email, password })
         .then((response) => {
-          console.log(response.data)
+f
           dispatch(loginSuccess(response.data));
           toast.success("Login Successfully");
 
