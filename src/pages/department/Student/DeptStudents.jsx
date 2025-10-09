@@ -22,12 +22,9 @@ export default function StudentCRUD() {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
 
-  // ⭐ Batch filter state
   const [selectedBatchFilter, setSelectedBatchFilter] = useState("all");
-
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
-
   const [page, setPage] = useState(1);
   const studentsPerPage = 10;
 
@@ -48,12 +45,10 @@ export default function StudentCRUD() {
   // Fetch students (with batch filter)
   const fetchStudents = async (batchId = "all") => {
     try {
-    
       setLoading(true);
       let url = "/departmentAdmin/students";
       if (batchId !== "all") url += `?batch=${batchId}`;
       const res = await api.get(url);
-     
       setStudents(res.data || []);
     } catch (err) {
       console.error(err);
@@ -67,7 +62,6 @@ export default function StudentCRUD() {
     fetchStudents(selectedBatchFilter);
   }, [selectedBatchFilter]);
 
-  // Handle input
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (selectedStudent) {
@@ -80,7 +74,7 @@ export default function StudentCRUD() {
   const handleBatchChange = (e) => {
     const batchId = e.target.value;
     if (selectedStudent) {
-      setSelectedStudent({ ...selectedStudent, batch: batchId }); // ⭐ always store _id
+      setSelectedStudent({ ...selectedStudent, batch: batchId });
     } else {
       setFormData({ ...formData, batch: batchId });
     }
@@ -91,12 +85,21 @@ export default function StudentCRUD() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post("/departmentAdmin/student", {
-        ...formData,
-        department: user?.department,
+      const data = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== null) data.append(key, value);
+      });
+      await api.post("/departmentAdmin/student", data, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
       toast.success("Student added successfully!");
-      setFormData({ name: "", email: "", rollNo: "", password: "", batch: "" });
+      setFormData({
+        name: "",
+        email: "",
+        rollNo: "",
+        password: "",
+        batch: "",
+      });
       setAddModalOpen(false);
       fetchStudents(selectedBatchFilter);
     } catch (err) {
@@ -122,7 +125,6 @@ export default function StudentCRUD() {
 
   // Edit student
   const handleEdit = (student) => {
-    // ⭐ make sure batch is stored as id for editing
     setSelectedStudent({
       ...student,
       batch: student.batch?._id || "",
@@ -134,7 +136,17 @@ export default function StudentCRUD() {
     e.preventDefault();
     try {
       setUpdateLoading(true);
-      await api.put(`/departmentAdmin/student/${selectedStudent._id}`, selectedStudent);
+      const data = new FormData();
+      Object.entries(selectedStudent).forEach(([key, value]) => {
+        if (value !== null) data.append(key, value);
+      });
+      await api.put(
+        `/departmentAdmin/student/${selectedStudent._id}`,
+        data,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
       toast.success("Student updated successfully!");
       setSelectedStudent(null);
       fetchStudents(selectedBatchFilter);
@@ -170,24 +182,19 @@ export default function StudentCRUD() {
 
   return (
     <div className="p-4 max-w-6xl mx-auto space-y-6">
+      {/* Header & Add Button */}
       <div className="flex justify-between flex-col sm:flex-row gap-3">
-        <div className="flex w-full justify-between">
         <h2 className="md:text-2xl text-xl font-semibold">Students</h2>
-
-
-        {/* Add Student Button */}
         <button
           onClick={() => setAddModalOpen(true)}
           className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
         >
           ➕ Add Student
         </button>
-      </div></div>
+      </div>
 
-      {/* Students Table */}
-      <div className="overflow-x-auto">
-        <div className="flex flex-col sm:flex-row gap-4 items-center my-4">
-           {/* ⭐ Batch Filter */}
+      {/* Filter & Search */}
+      <div className="flex flex-col sm:flex-row gap-4 items-center my-4">
         <select
           value={selectedBatchFilter}
           onChange={(e) => setSelectedBatchFilter(e.target.value)}
@@ -200,24 +207,26 @@ export default function StudentCRUD() {
             </option>
           ))}
         </select>
-          <input
-            type="text"
-            placeholder="Search students..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setPage(1);
-            }}
-            className="border p-2 rounded w-full sm:w-1/2"
-          />
-          <button
-            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-            className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Sort Roll No ({sortOrder === "asc" ? "Asc" : "Desc"})
-          </button>
-        </div>
+        <input
+          type="text"
+          placeholder="Search students..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setPage(1);
+          }}
+          className="border p-2 rounded w-full sm:w-1/2"
+        />
+        <button
+          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+          className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Sort Roll No ({sortOrder === "asc" ? "Asc" : "Desc"})
+        </button>
+      </div>
 
+      {/* Students Table */}
+      <div className="overflow-x-auto">
         <table className="w-full border-collapse border">
           <thead className="bg-gray-100">
             <tr>
@@ -225,6 +234,7 @@ export default function StudentCRUD() {
               <th className="border px-3 py-2 text-left">Email</th>
               <th className="border px-3 py-2 text-left">Roll No</th>
               <th className="border px-3 py-2 text-left">Batch</th>
+              <th className="border px-3 py-2 text-left">Outcome</th>
               <th className="border px-3 py-2 text-left">Actions</th>
             </tr>
           </thead>
@@ -236,6 +246,19 @@ export default function StudentCRUD() {
                   <td className="border px-3 py-2">{s.email}</td>
                   <td className="border px-3 py-2">{s.rollNo}</td>
                   <td className="border px-3 py-2">{s.batch?.name || "-"}</td>
+                  <td className="border px-3 py-2">
+                    {s.outcome?.type || "-"}{" "}
+                    {s.outcome?.certificate && (
+                      <a
+                        href={s.outcome.certificate}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline ml-2"
+                      >
+                        View Certificate
+                      </a>
+                    )}
+                  </td>
                   <td className="border px-3 py-2 flex gap-2">
                     <button
                       onClick={() => handleEdit(s)}
@@ -254,7 +277,7 @@ export default function StudentCRUD() {
               ))
             ) : (
               <tr>
-                <td colSpan="5" className="text-center py-4">
+                <td colSpan="6" className="text-center py-4">
                   No students found
                 </td>
               </tr>
@@ -298,7 +321,7 @@ export default function StudentCRUD() {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Full Name"
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400"
+                className="w-full p-2 border rounded"
                 required
               />
               <input
@@ -307,7 +330,7 @@ export default function StudentCRUD() {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Email"
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400"
+                className="w-full p-2 border rounded"
                 required
               />
               <input
@@ -316,7 +339,7 @@ export default function StudentCRUD() {
                 value={formData.rollNo}
                 onChange={handleChange}
                 placeholder="Roll Number"
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400"
+                className="w-full p-2 border rounded"
                 required
               />
               <input
@@ -325,14 +348,14 @@ export default function StudentCRUD() {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Password"
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400"
+                className="w-full p-2 border rounded"
                 required
               />
               <select
                 value={formData.batch}
                 name="batch"
                 onChange={handleBatchChange}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400"
+                className="w-full p-2 border rounded"
                 required
               >
                 <option value="">Select Batch</option>
@@ -376,7 +399,7 @@ export default function StudentCRUD() {
                 name="name"
                 value={selectedStudent.name}
                 onChange={handleChange}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400"
+                className="w-full p-2 border rounded"
                 required
               />
               <input
@@ -384,7 +407,7 @@ export default function StudentCRUD() {
                 name="email"
                 value={selectedStudent.email}
                 onChange={handleChange}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400"
+                className="w-full p-2 border rounded"
                 required
               />
               <input
@@ -392,13 +415,13 @@ export default function StudentCRUD() {
                 name="rollNo"
                 value={selectedStudent.rollNo}
                 onChange={handleChange}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400"
+                className="w-full p-2 border rounded"
                 required
               />
               <select
                 value={selectedStudent.batch || ""}
                 onChange={handleBatchChange}
-                className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400"
+                className="w-full p-2 border rounded"
                 required
               >
                 <option value="">Select Batch</option>

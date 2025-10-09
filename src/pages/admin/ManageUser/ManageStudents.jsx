@@ -76,13 +76,13 @@ export default function ManageStudents() {
       .finally(() => setLoading(false));
   };
 
-  // 🔍 Filter students based on search term
+  // 🔍 Filter students
   const filteredStudents = students.filter((s) => {
     const search = searchTerm.toLowerCase();
     return (
-      s.name.toLowerCase().includes(search) ||
-      s.email.toLowerCase().includes(search) ||
-      (s.rollNo?.toLowerCase().includes(search) ?? false)
+      s.name?.toLowerCase().includes(search) ||
+      s.email?.toLowerCase().includes(search) ||
+      s.rollNo?.toLowerCase().includes(search)
     );
   });
 
@@ -91,10 +91,10 @@ export default function ManageStudents() {
   const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
   const currentStudents = filteredStudents.slice(indexOfFirstStudent, indexOfLastStudent);
   const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
-
+  console.log(students)
   return (
     <div className="p-4 sm:p-6 bg-white shadow-md rounded-xl space-y-6">
-      <h2 className="md:text-2xl text-xl font-bold text-gray-800"> Students</h2>
+      <h2 className="md:text-2xl text-xl font-bold text-gray-800">Manage Students</h2>
 
       {/* Filters + Search */}
       <div className="bg-gray-50 p-4 rounded-lg shadow-sm space-y-4">
@@ -151,7 +151,7 @@ export default function ManageStudents() {
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
-            setCurrentPage(1); // reset page on search
+            setCurrentPage(1);
           }}
           className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
         />
@@ -174,25 +174,56 @@ export default function ManageStudents() {
           </p>
         ) : (
           <>
-            <table className="w-full border rounded-lg shadow-md min-w-[400px]">
+            <table className="w-full border rounded-lg shadow-md min-w-[500px]">
               <thead className="bg-blue-600 text-white">
                 <tr>
                   <th className="px-4 py-3 text-left">Name</th>
                   <th className="px-4 py-3 text-left">Email</th>
                   <th className="px-4 py-3 text-left">Roll No</th>
+                  <th className="px-4 py-3 text-left">Outcome</th>
+                  <th className="px-4 py-3 text-left">Certificate</th>
                 </tr>
               </thead>
               <tbody>
                 {currentStudents.map((s, idx) => (
                   <tr
                     key={s._id}
-                    className={`${
-                      idx % 2 === 0 ? "bg-gray-50" : "bg-white"
-                    } hover:bg-blue-50 transition`}
+                    className={`${idx % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-blue-50 transition`}
                   >
                     <td className="px-4 py-3">{s.name}</td>
                     <td className="px-4 py-3">{s.email}</td>
                     <td className="px-4 py-3">{s.rollNo}</td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {s.outcome?.type ? (
+                        <span
+                          className={`px-2 py-1 text-sm font-medium rounded-full ${
+                            s.outcome.type === "NET-JRF"
+                              ? "bg-green-100 text-green-700"
+                              : s.outcome.type === "IT"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-blue-100 text-blue-700"
+                          }`}
+                        >
+                          {s.outcome.type}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 italic">Not updated</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      {s.outcome?.certificate ? (
+                        <a
+                          href={s.outcome.certificate}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline hover:text-blue-800"
+                        >
+                          View Certificate
+                        </a>
+                      ) : (
+                        <span className="text-gray-400 italic">No file</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

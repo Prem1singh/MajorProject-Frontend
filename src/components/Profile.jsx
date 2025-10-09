@@ -12,7 +12,11 @@ export default function ProfileTab() {
     email: "",
     profilePicture: null,
     profilePicturePreview: "",
+    outcomeType: "",              // Added outcome type
+    outcomeCertificate: null,     // Added outcome certificate
+    outcomeCertificatePreview: "",// For preview if needed
   });
+
   const [batchName, setBatchName] = useState("");
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -25,6 +29,9 @@ export default function ProfileTab() {
         email: user.email || "",
         profilePicture: null,
         profilePicturePreview: user.profileUrl || "",
+        outcomeType: user.outcome?.type || "",
+        outcomeCertificate: null,
+        outcomeCertificatePreview: user.outcome?.certificate || "",
       });
     }
 
@@ -57,21 +64,45 @@ export default function ProfileTab() {
     }));
   };
 
+  const handleCertificateChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setFormData((prev) => ({
+      ...prev,
+      outcomeCertificate: file,
+      outcomeCertificatePreview: URL.createObjectURL(file),
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMsg("");
-
+  
     try {
       const data = new FormData();
       data.append("name", formData.name);
       data.append("email", formData.email);
-      if (formData.profilePicture) data.append("profilePicture", formData.profilePicture);
-
+  
+      // Append profile picture if selected
+      if (formData.profilePicture instanceof File) {
+        data.append("profilePicture", formData.profilePicture);
+      }
+  
+      // Append outcome type if selected
+      if (formData.outcomeType) {
+        data.append("outcomeType", formData.outcomeType);
+      }
+  
+      // Append outcome certificate if selected
+      if (formData.outcomeCertificate instanceof File) {
+        data.append("outcomeCertificate", formData.outcomeCertificate);
+      }
+  
       const res = await api.put("/users/profile", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-
+  
       const updatedUser = res.data.user || res.data;
       dispatch(updateProfile(updatedUser));
       setMsg("Profile updated successfully!");
@@ -83,6 +114,7 @@ export default function ProfileTab() {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="p-4 sm:p-6 max-w-3xl mx-auto w-full">
@@ -166,7 +198,55 @@ export default function ProfileTab() {
           </>
         )}
 
-        {/* Role */}
+        {/* Outcome Type */}
+        {user.role === "Student"?
+        <div>
+<div>
+          <label className="block font-semibold">Outcome Type:</label>
+          {editMode ? (
+            <select
+              name="outcomeType"
+              value={formData.outcomeType}
+              onChange={handleChange}
+              className="border p-2 rounded w-full"
+            >
+              <option value="">Select Outcome</option>
+              <option value="NET-JRF">NET-JRF</option>
+              <option value="IT">IT</option>
+              <option value="GovtJob">GovtJob</option>
+            </select>
+          ) : (
+            <p>{user.outcome?.type || "-"}</p>
+          )}
+        </div>
+
+       
+        <div>
+          <label className="block font-semibold">Outcome Certificate:</label>
+          {editMode ? (
+            <input
+              type="file"
+              accept="image/*,application/pdf"
+              onChange={handleCertificateChange}
+              className="border p-1 rounded w-full"
+            />
+          ) : user.outcome?.certificate ? (
+            <a
+              href={user.outcome.certificate}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline hover:text-blue-800"
+            >
+              View Certificate
+            </a>
+          ) : (
+            <p className="text-gray-400 italic">No certificate uploaded</p>
+          )}
+        </div>
+        </div> :
+        ""
+        }
+       
         <div>
           <label className="block font-semibold">Role:</label>
           <p className="capitalize">{user.role || "student"}</p>

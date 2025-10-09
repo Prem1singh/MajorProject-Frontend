@@ -17,6 +17,11 @@ export default function Layout() {
     return <Navigate to="/login" replace />;
   }
 
+  // Callback to close sidebar on mobile
+  const handleSidebarItemClick = () => {
+    setSidebarOpen(false);
+  };
+
   return (
     <div className="h-screen flex flex-col">
       {/* Fixed Header */}
@@ -38,7 +43,7 @@ export default function Layout() {
       <div className="flex flex-1 pt-16">
         {/* Sidebar (Desktop) */}
         <aside className="hidden lg:block fixed top-16 left-0 h-[calc(100vh-4rem)] w-60 bg-white border-r shadow z-40">
-          <Aside />
+          <Aside onItemClick={handleSidebarItemClick} />
         </aside>
 
         {/* Sidebar (Mobile Drawer) */}
@@ -51,7 +56,7 @@ export default function Layout() {
             />
             {/* Drawer */}
             <aside className="relative w-60 bg-white h-full shadow-lg z-50">
-              <Aside />
+              <Aside onItemClick={handleSidebarItemClick} />
             </aside>
           </div>
         )}

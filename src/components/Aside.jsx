@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-export default function Aside({ closeSidebar }) {
+export default function Aside({ onItemClick }) {
   const user = useSelector((state) => state.user.data);
   const location = useLocation();
 
@@ -20,7 +20,6 @@ export default function Aside({ closeSidebar }) {
       { name: "Announcement", path: "/teacher/announcement" },
       { name: "Study Material", path: "/teacher/study" },
       { name: "Performance", path: "/teacher/performance" },
-
     ],
     DepartmentAdmin: [
       { name: "Dashboard", path: "/department/dashboard" },
@@ -33,8 +32,6 @@ export default function Aside({ closeSidebar }) {
       { name: "Marks", path: "/department/marks" },
       { name: "Placement", path: "/department/placement" },
       { name: "Performance", path: "/department/performance" },
-
-
     ],
     Student: [
       { name: "Dashboard", path: "/student/dashboard" },
@@ -46,21 +43,19 @@ export default function Aside({ closeSidebar }) {
       { name: "Doubts", path: "/student/doubt" },
       { name: "Placement", path: "/student/placement" },
       { name: "Performance", path: "/student/performance" },
-
-
     ],
   };
 
   const roleMenus = menus[user?.role] || [];
 
   return (
-    <aside className="h-full w-64 bg-gray-800 text-white flex flex-col">
+    <aside className="h-full flex flex-col bg-gray-800 text-white">
       {/* Header */}
       <div className="px-6 py-6 pt-9 text-xl font-bold border-b border-gray-700">
         {user?.role || "Guest"}
       </div>
 
-      {/* Nav */}
+      {/* Navigation */}
       <nav className="flex-1 px-4 py-6 overflow-y-auto">
         <ul className="space-y-2">
           {roleMenus.map((menu, idx) => {
@@ -69,7 +64,10 @@ export default function Aside({ closeSidebar }) {
               <li key={idx}>
                 <Link
                   to={menu.path}
-                  onClick={() => closeSidebar && closeSidebar()} // close drawer on mobile
+                  onClick={() => {
+                    // Close sidebar on small devices
+                    if (onItemClick) onItemClick();
+                  }}
                   className={`block px-4 py-2 rounded transition ${
                     isActive
                       ? "bg-blue-600 text-white"
