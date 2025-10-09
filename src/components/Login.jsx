@@ -33,10 +33,10 @@ export default function LoginPage() {
       api
         .post("/users/login", { email, password })
         .then((response) => {
-f
+
           dispatch(loginSuccess(response.data));
           toast.success("Login Successfully");
-
+          
           const role = response.data.user.role;
           switch (role) {
             case "Teacher":
