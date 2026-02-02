@@ -3,8 +3,8 @@ import store from "../redux/store";
 import { loginSuccess, logout } from "../redux/slice/userSlice";
 
 const api = axios.create({
-  // baseURL: "https://major-project-backend-roan.vercel.app/api",
-  baseURL: "http://localhost:3005/api",
+  baseURL: "https://major-project-backend-roan.vercel.app/api",
+  // baseURL: "http://localhost:3005/api",
 
 });
 
@@ -31,7 +31,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        const res = await axios.post("http://localhost:3005/api/users/refresh-token", {
+        const res = await axios.post("https://major-project-backend-roan.vercel.app/api/users/refresh-token", {
           refreshToken: state.user.refreshToken,  // ✅ matches backend now
         });
 
