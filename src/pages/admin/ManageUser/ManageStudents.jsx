@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
 import api from "../../../utils/axiosInstance";
+import { 
+  FiUser, FiMail, FiHash, FiAward, FiFileText, 
+  FiSearch, FiFilter, FiChevronLeft, FiChevronRight, FiCheckCircle 
+} from "react-icons/fi";
 
 export default function ManageStudents() {
   const [departments, setDepartments] = useState([]);
@@ -13,70 +17,56 @@ export default function ManageStudents() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // Pagination
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const studentsPerPage = 10;
 
-  // 🔍 Search
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // Fetch departments
+  // 1. Fetch Departments
   useEffect(() => {
-    api
-      .get("/admin/departments")
+    api.get("/admin/departments")
       .then((res) => setDepartments(res.data))
       .catch(() => setError("Failed to fetch departments"));
   }, []);
 
-  // Fetch courses when department changes
+  // 2. Fetch Courses
   useEffect(() => {
     if (!selectedDept) {
-      setCourses([]);
-      setSelectedCourse(null);
-      setBatches([]);
-      setSelectedBatch("");
+      setCourses([]); setSelectedCourse(null); setBatches([]); setSelectedBatch("");
       return;
     }
-    api
-      .get(`/admin/department/${selectedDept}/courses`)
+    api.get(`/admin/department/${selectedDept}/courses`)
       .then((res) => setCourses(res.data))
       .catch(() => setError("Failed to fetch courses"));
   }, [selectedDept]);
 
-  // Fetch batches when course changes
+  // 3. Fetch Batches
   useEffect(() => {
     if (!selectedCourse) {
-      setBatches([]);
-      setSelectedBatch("");
+      setBatches([]); setSelectedBatch("");
       return;
     }
-    api
-      .get(`/admin/course/${selectedCourse._id}/batches`)
+    api.get(`/admin/course/${selectedCourse._id}/batches`)
       .then((res) => setBatches(res.data.batches))
       .catch(() => setError("Failed to fetch batches"));
   }, [selectedCourse]);
 
-  // Fetch students when batch changes
+  // 4. Fetch Students
   useEffect(() => {
     if (!selectedBatch) {
-      setStudents([]);
-      return;
+      setStudents([]); return;
     }
-    setCurrentPage(1); // reset page on batch change
+    setCurrentPage(1);
     fetchStudents();
   }, [selectedBatch]);
 
   const fetchStudents = () => {
     setLoading(true);
-    api
-      .get(`/admin/batches/${selectedBatch}/students`)
+    api.get(`/admin/batches/${selectedBatch}/students`)
       .then((res) => setStudents(res.data.students))
       .catch(() => setError("Failed to fetch students"))
       .finally(() => setLoading(false));
   };
 
-  // 🔍 Filter students
   const filteredStudents = students.filter((s) => {
     const search = searchTerm.toLowerCase();
     return (
@@ -86,168 +76,166 @@ export default function ManageStudents() {
     );
   });
 
-  // Pagination logic
-  const indexOfLastStudent = currentPage * studentsPerPage;
-  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
-  const currentStudents = filteredStudents.slice(indexOfFirstStudent, indexOfLastStudent);
+  const indexOfLast = currentPage * studentsPerPage;
+  const indexOfFirst = indexOfLast - studentsPerPage;
+  const currentStudents = filteredStudents.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
 
   return (
-    <div className="p-4 sm:p-6 bg-white shadow-md rounded-xl space-y-6">
-      <h2 className="md:text-2xl text-xl font-bold text-gray-800">Manage Students</h2>
+    <div className="space-y-10 animate-in fade-in duration-700">
+      
+      {/* --- Filter Section --- */}
+      <div className="bg-slate-50/50 p-8 rounded-[2.5rem] border border-slate-100 shadow-inner">
+        <h3 className="text-xs font-black uppercase tracking-[0.3em] text-emerald-600 mb-6 flex items-center gap-2">
+          <FiFilter /> Student Selection Filters
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Department</label>
+            <select
+              value={selectedDept}
+              onChange={(e) => setSelectedDept(e.target.value)}
+              className="w-full bg-white border-2 border-slate-100 rounded-2xl py-3.5 px-6 font-bold text-slate-700 focus:border-emerald-500 outline-none transition-all cursor-pointer"
+            >
+              <option value="">Select Dept</option>
+              {departments?.map((d) => <option key={d._id} value={d._id}>{d.name}</option>)}
+            </select>
+          </div>
 
-      {/* Filters + Search */}
-      <div className="bg-gray-50 p-4 rounded-lg shadow-sm space-y-4">
-        <h3 className="text-lg font-semibold text-gray-700">Filter Students</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          <select
-            value={selectedDept}
-            onChange={(e) => setSelectedDept(e.target.value)}
-            className="p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none w-full"
-          >
-            <option value="">Select Department</option>
-            {departments?.map((d) => (
-              <option key={d._id} value={d._id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Course</label>
+            <select
+              value={selectedCourse?._id || ""}
+              onChange={(e) => setSelectedCourse(courses.find((c) => c._id === e.target.value))}
+              disabled={!courses.length}
+              className="w-full bg-white border-2 border-slate-100 rounded-2xl py-3.5 px-6 font-bold text-slate-700 focus:border-emerald-500 outline-none transition-all disabled:opacity-50"
+            >
+              <option value="">Select Course</option>
+              {courses?.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
+            </select>
+          </div>
 
-          <select
-            value={selectedCourse?._id || ""}
-            onChange={(e) =>
-              setSelectedCourse(courses.find((c) => c._id === e.target.value))
-            }
-            className="p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none w-full"
-            disabled={!courses.length}
-          >
-            <option value="">Select Course</option>
-            {courses?.map((c) => (
-              <option key={c._id} value={c._id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={selectedBatch}
-            onChange={(e) => setSelectedBatch(e.target.value)}
-            className="p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none w-full"
-            disabled={!batches.length}
-          >
-            <option value="">Select Batch</option>
-            {batches?.map((b) => (
-              <option key={b._id} value={b._id}>
-                {b.name}
-              </option>
-            ))}
-          </select>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Batch</label>
+            <select
+              value={selectedBatch}
+              onChange={(e) => setSelectedBatch(e.target.value)}
+              disabled={!batches.length}
+              className="w-full bg-white border-2 border-slate-100 rounded-2xl py-3.5 px-6 font-bold text-slate-700 focus:border-emerald-500 outline-none transition-all disabled:opacity-50"
+            >
+              <option value="">Select Batch</option>
+              {batches?.map((b) => <option key={b._id} value={b._id}>{b.name}</option>)}
+            </select>
+          </div>
         </div>
 
         {/* Search Bar */}
-        <input
-          type="text"
-          placeholder="Search by name, email, roll no..."
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-        />
+        <div className="relative group">
+          <FiSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
+          <input
+            type="text"
+            placeholder="Quick search by name, email or roll number..."
+            value={searchTerm}
+            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+            className="w-full bg-white border-2 border-slate-100 rounded-2xl py-4 pl-14 pr-6 font-bold text-slate-700 outline-none focus:border-emerald-500 shadow-sm"
+          />
+        </div>
       </div>
 
-      {/* Error */}
       {error && (
-        <p className="text-red-600 mb-4 font-medium bg-red-50 p-2 rounded-lg text-center">
+        <div className="bg-rose-50 text-rose-500 p-4 rounded-2xl border border-rose-100 text-center font-bold text-xs uppercase tracking-widest">
           {error}
-        </p>
+        </div>
       )}
 
-      {/* Students Table */}
-      <div className="overflow-x-auto">
+      {/* --- Data Table --- */}
+      <div className="relative">
         {loading ? (
-          <p className="text-gray-600 text-center py-4">Loading students...</p>
+          <div className="py-20 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-600 border-t-transparent mx-auto"></div>
+            <p className="mt-4 text-emerald-500 font-black italic text-xs uppercase">Syncing Roster...</p>
+          </div>
         ) : currentStudents.length === 0 ? (
-          <p className="text-gray-500 italic text-center py-4">
-            No students found for the selected filters.
-          </p>
+          <div className="py-24 text-center border-4 border-dashed border-slate-50 rounded-[3rem]">
+            <FiUser className="mx-auto text-slate-100 text-7xl mb-4" />
+            <p className="text-slate-300 font-black italic uppercase text-sm">No Student Records Found</p>
+          </div>
         ) : (
           <>
-            <table className="w-full border rounded-lg shadow-md min-w-[500px]">
-              <thead className="bg-blue-600 text-white">
-                <tr>
-                  <th className="px-4 py-3 text-left">Name</th>
-                  <th className="px-4 py-3 text-left">Email</th>
-                  <th className="px-4 py-3 text-left">Roll No</th>
-                  <th className="px-4 py-3 text-left">Outcome</th>
-                  <th className="px-4 py-3 text-left">Certificate</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentStudents.map((s, idx) => (
-                  <tr
-                    key={s._id}
-                    className={`${idx % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-blue-50 transition`}
-                  >
-                    <td className="px-4 py-3">{s.name}</td>
-                    <td className="px-4 py-3">{s.email}</td>
-                    <td className="px-4 py-3">{s.rollNo}</td>
-                    <td className="px-4 py-3 text-gray-700">
-                      {s.outcome?.type ? (
-                        <span
-                          className={`px-2 py-1 text-sm font-medium rounded-full ${
-                            s.outcome.type === "NET-JRF"
-                              ? "bg-green-100 text-green-700"
-                              : s.outcome.type === "IT"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-blue-100 text-blue-700"
-                          }`}
-                        >
-                          {s.outcome.type}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400 italic">Not updated</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {s.outcome?.certificate ? (
-                        <a
-                          href={s.outcome.certificate}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 underline hover:text-blue-800"
-                        >
-                          View Certificate
-                        </a>
-                      ) : (
-                        <span className="text-gray-400 italic">No file</span>
-                      )}
-                    </td>
+            <div className="overflow-x-auto rounded-[2.5rem] border border-slate-100 shadow-sm bg-white">
+              <table className="w-full border-collapse min-w-[800px]">
+                <thead>
+                  <tr className="bg-emerald-50/50 border-b border-emerald-100">
+                    <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest">Full Name</th>
+                    <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest">Identity / Email</th>
+                    <th className="py-6 px-8 text-center text-[10px] font-black uppercase text-emerald-700 tracking-widest">Outcome</th>
+                    <th className="py-6 px-8 text-center text-[10px] font-black uppercase text-emerald-700 tracking-widest">Evidence</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-emerald-50">
+                  {currentStudents.map((s, idx) => (
+                    <tr key={s._id} className="hover:bg-emerald-50/20 transition-all group">
+                      <td className="py-6 px-8">
+                        <p className="font-bold text-slate-700">{s.name}</p>
+                        <p className="text-[10px] font-black text-slate-400 italic">#{s.rollNo}</p>
+                      </td>
+                      <td className="py-6 px-8">
+                        <div className="flex items-center gap-2 text-slate-500 font-medium text-sm">
+                           <FiMail className="text-emerald-400" /> {s.email}
+                        </div>
+                      </td>
+                      <td className="py-6 px-8 text-center">
+                        {s.outcome?.type ? (
+                          <span className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-full border ${
+                            s.outcome.type === "NET-JRF" ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                            s.outcome.type === "IT" ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-slate-50 text-slate-500 border-slate-100"
+                          }`}>
+                            {s.outcome.type}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-300 font-bold italic uppercase">Pending Update</span>
+                        )}
+                      </td>
+                      <td className="py-6 px-8 text-center">
+                        {s.outcome?.certificate ? (
+                          <a href={s.outcome.certificate} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-black text-[10px] uppercase tracking-widest">
+                            <FiAward /> View Doc
+                          </a>
+                        ) : (
+                          <FiFileText className="mx-auto text-slate-200" size={20} />
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
             {/* Pagination */}
-            <div className="flex justify-center items-center gap-4 mt-4">
-              <button
-                className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
-                onClick={() => setCurrentPage((p) => p - 1)}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </button>
-              <span className="text-gray-700 font-medium">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
-                onClick={() => setCurrentPage((p) => p + 1)}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </button>
+            <div className="flex flex-col md:flex-row justify-between items-center px-4 py-8 gap-4">
+              <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
+                Displaying <span className="text-emerald-600">{indexOfFirst + 1} - {Math.min(indexOfLast, filteredStudents.length)}</span> of {filteredStudents.length} Students
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} 
+                  disabled={currentPage === 1}
+                  className="p-3 rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 disabled:opacity-20 transition-all"
+                >
+                  <FiChevronLeft size={20} />
+                </button>
+                <div className="flex items-center px-6 bg-slate-50 rounded-xl text-[10px] font-black uppercase text-slate-500 tracking-[0.2em]">
+                  Page {currentPage} / {totalPages}
+                </div>
+                <button 
+                  onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} 
+                  disabled={currentPage === totalPages}
+                  className="p-3 rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 disabled:opacity-20 transition-all"
+                >
+                  <FiChevronRight size={20} />
+                </button>
+              </div>
             </div>
           </>
         )}

@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import api from "../../../utils/axiosInstance";
 import { toast } from "react-toastify";
+import { 
+  FiUsers, FiBook, FiLayers, FiSearch, 
+  FiChevronLeft, FiChevronRight, FiFilter, FiBarChart2 
+} from "react-icons/fi";
 
 export default function DepartmentMarksViewer() {
   const [batches, setBatches] = useState([]);
@@ -16,40 +20,47 @@ export default function DepartmentMarksViewer() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const marksPerPage = 5;
+  const marksPerPage = 8;
 
-  // Fetch batches on load
   useEffect(() => {
     const fetchBatches = async () => {
-      const res = await api.get("/batches");
-      setBatches(res.data);
+      try {
+        const res = await api.get("/batches");
+        setBatches(res.data);
+      } catch (err) {
+        toast.error("Failed to load batches");
+      }
     };
     fetchBatches();
   }, []);
 
-  // Fetch students and subjects when batch changes
   useEffect(() => {
     if (!selectedBatch) return;
     const fetchData = async () => {
-      const [studentsRes, subjectsRes] = await Promise.all([
-        api.get(`/departmentAdmin/students/batch?batch=${selectedBatch}`),
-        api.get(`/departmentAdmin/subjects/batch?batch=${selectedBatch}`)
-      ]);
-      setStudents(studentsRes.data);
-      setSubjects(subjectsRes.data);
-      setSelectedStudent("");
-      setSelectedSubject("");
-      setMarks([]);
-      setExams([]);
-      setSearchTerm("");
-      setCurrentPage(1);
+      try {
+        const [studentsRes, subjectsRes] = await Promise.all([
+          api.get(`/departmentAdmin/students/batch?batch=${selectedBatch}`),
+          api.get(`/departmentAdmin/subjects/batch?batch=${selectedBatch}`)
+        ]);
+        setStudents(studentsRes.data);
+        setSubjects(subjectsRes.data);
+        // Reset selections
+        setSelectedStudent("");
+        setSelectedSubject("");
+        setMarks([]);
+        setExams([]);
+        setSearchTerm("");
+        setCurrentPage(1);
+      } catch (err) {
+        toast.error("Error loading batch data");
+      }
     };
     fetchData();
   }, [selectedBatch]);
 
   const fetchMarks = async () => {
-    if (viewBy === "student" && !selectedStudent) return toast.error("Select a student");
-    if (viewBy === "subject" && !selectedSubject) return toast.error("Select a subject");
+    if (viewBy === "student" && !selectedStudent) return toast.error("Please select a student");
+    if (viewBy === "subject" && !selectedSubject) return toast.error("Please select a subject");
 
     setLoading(true);
     try {
@@ -62,179 +73,204 @@ export default function DepartmentMarksViewer() {
       setMarks(res.data.data || []);
       setCurrentPage(1);
     } catch (err) {
-      console.error(err);
       toast.error("Failed to fetch marks");
     } finally {
       setLoading(false);
     }
   };
 
-  // Filter by search
   const filteredMarks = marks.filter((m) =>
     m.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Sort by rollNo ascending (if present)
   const sortedMarks = [...filteredMarks].sort((a, b) => (a.rollNo || 0) - (b.rollNo || 0));
-
-  // Pagination
-  const indexOfLastMark = currentPage * marksPerPage;
-  const indexOfFirstMark = indexOfLastMark - marksPerPage;
-  const currentMarks = sortedMarks.slice(indexOfFirstMark, indexOfLastMark);
   const totalPages = Math.ceil(sortedMarks.length / marksPerPage);
+  const currentMarks = sortedMarks.slice((currentPage - 1) * marksPerPage, currentPage * marksPerPage);
 
   return (
-    <div className="space-y-6 p-4 max-w-6xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">View Marks</h2>
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-10 min-h-screen bg-[#f8fafc]">
+      
+      {/* Header Section */}
+      <header className="mb-10">
+        <div className="flex items-center gap-3 mb-2">
+          <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">HOD Analytics</span>
+          <h2 className="text-3xl font-black text-slate-800 tracking-tight">Department Marks Viewer</h2>
+        </div>
+        <p className="text-slate-500 font-medium">Analyze student performance across subjects and examinations.</p>
+      </header>
 
-      {/* Batch Selection */}
-      <div>
-        <label className="block mb-1 font-semibold text-gray-700">Select Batch</label>
-        <select
-          className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-          value={selectedBatch}
-          onChange={(e) => setSelectedBatch(e.target.value)}
-        >
-          <option value="">-- Select Batch --</option>
-          {batches.map((b) => (
-            <option key={b._id} value={b._id}>{b.name}</option>
-          ))}
-        </select>
+      {/* Control Panel Card */}
+      <div className="bg-white rounded-[2.5rem] p-6 sm:p-10 shadow-sm border border-emerald-50 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-end">
+          
+          {/* Batch Select */}
+          <div className="space-y-2">
+            <label className="text-xs font-black text-slate-400 uppercase ml-1 flex items-center gap-2">
+              <FiLayers className="text-emerald-500" /> Select Batch
+            </label>
+            <select
+              className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 focus:border-emerald-500 focus:bg-white outline-none transition-all font-bold text-slate-700 appearance-none"
+              value={selectedBatch}
+              onChange={(e) => setSelectedBatch(e.target.value)}
+            >
+              <option value="">Choose Batch...</option>
+              {batches.map((b) => (
+                <option key={b._id} value={b._id}>{b.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* View Toggle */}
+          <div className="space-y-2">
+            <label className="text-xs font-black text-slate-400 uppercase ml-1 flex items-center gap-2">
+              <FiFilter className="text-emerald-500" /> View Perspective
+            </label>
+            <div className="flex p-1 bg-slate-100 rounded-2xl">
+              <button
+                onClick={() => setViewBy("student")}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all ${viewBy === "student" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+              >
+                <FiUsers size={18} /> Student
+              </button>
+              <button
+                onClick={() => setViewBy("subject")}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all ${viewBy === "subject" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+              >
+                <FiBook size={18} /> Subject
+              </button>
+            </div>
+          </div>
+
+          {/* Target Select */}
+          <div className="space-y-2">
+            <label className="text-xs font-black text-slate-400 uppercase ml-1 flex items-center gap-2">
+              {viewBy === "student" ? <FiUsers className="text-emerald-500" /> : <FiBook className="text-emerald-500" />} 
+              Specific {viewBy === "student" ? "Student" : "Subject"}
+            </label>
+            <select
+              disabled={!selectedBatch}
+              className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 focus:border-emerald-500 focus:bg-white outline-none transition-all font-bold text-slate-700 appearance-none disabled:opacity-50"
+              value={viewBy === "student" ? selectedStudent : selectedSubject}
+              onChange={(e) => viewBy === "student" ? setSelectedStudent(e.target.value) : setSelectedSubject(e.target.value)}
+            >
+              <option value="">-- Select {viewBy === "student" ? "Student" : "Subject"} --</option>
+              {(viewBy === "student" ? students : subjects).map((item) => (
+                <option key={item._id} value={item._id}>{item.name}</option>
+              ))}
+            </select>
+          </div>
+
+        </div>
+
+        <div className="mt-8 flex flex-col sm:flex-row gap-4">
+          <button
+            onClick={fetchMarks}
+            disabled={loading || !selectedBatch}
+            className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-4 rounded-2xl font-black transition-all shadow-xl shadow-emerald-100 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {loading ? "Syncing..." : <><FiBarChart2 /> Generate Report</>}
+          </button>
+          
+          {marks.length > 0 && (
+            <div className="flex-1 relative">
+              <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder={`Quick search ${viewBy === "student" ? "subject" : "student"}...`}
+                value={searchTerm}
+                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+                className="w-full bg-slate-50 border-2 border-transparent focus:border-emerald-500 rounded-2xl py-4 pl-12 pr-4 outline-none font-bold text-slate-600 transition-all"
+              />
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* View By Toggle */}
-      <div className="flex items-center gap-4 mt-4">
-        <label className="flex items-center gap-2">
-          <input
-            type="radio"
-            name="viewBy"
-            value="student"
-            checked={viewBy === "student"}
-            onChange={() => setViewBy("student")}
-            className="form-radio"
-          />
-          By Student
-        </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="radio"
-            name="viewBy"
-            value="subject"
-            checked={viewBy === "subject"}
-            onChange={() => setViewBy("subject")}
-            className="form-radio"
-          />
-          By Subject
-        </label>
-      </div>
+      {/* Results Table Section */}
+      {currentMarks.length > 0 ? (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="bg-white rounded-[2.5rem] border border-emerald-50 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50/50 border-b border-emerald-50">
+                    {viewBy === "subject" && <th className="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Roll No</th>}
+                    <th className="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      {viewBy === "subject" ? "Student Name" : "Subject Name"}
+                    </th>
+                    {exams.map((exam) => (
+                      <th key={exam} className="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">{exam}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {currentMarks.map((m, i) => (
+                    <tr key={i} className="hover:bg-emerald-50/30 transition-colors group">
+                      {viewBy === "subject" && (
+                        <td className="p-6 font-bold text-slate-400 group-hover:text-emerald-600">{m.rollNo || "N/A"}</td>
+                      )}
+                      <td className="p-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-xs uppercase">
+                            {m.name.charAt(0)}
+                          </div>
+                          <span className="font-bold text-slate-700">{m.name}</span>
+                        </div>
+                      </td>
+                      {exams.map((exam) => (
+                        <td key={exam} className="p-6 text-center">
+                          <span className={`inline-block px-3 py-1 rounded-lg font-black ${m[exam] !== null ? 'text-emerald-600 bg-emerald-50 border border-emerald-100' : 'text-slate-300'}`}>
+                            {m[exam] !== null && m[exam] !== undefined ? m[exam] : "--"}
+                          </span>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-      {/* Dynamic Student or Subject Selection */}
-      {viewBy === "student" && (
-        <div>
-          <label className="block mb-1 font-semibold text-gray-700">Select Student</label>
-          <select
-            className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-            value={selectedStudent}
-            onChange={(e) => setSelectedStudent(e.target.value)}
-          >
-            <option value="">-- Select Student --</option>
-            {students.map((s) => (
-              <option key={s._id} value={s._id}>{s.name}</option>
-            ))}
-          </select>
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="p-6 border-t border-slate-50 bg-slate-50/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <span className="text-sm font-bold text-slate-400">
+                  Showing <span className="text-slate-700">{indexOfFirstMark + 1}</span> to <span className="text-slate-700">{Math.min(indexOfLastMark, sortedMarks.length)}</span> of {sortedMarks.length} entries
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="p-3 rounded-xl bg-white border border-slate-200 text-slate-600 disabled:opacity-30 hover:border-emerald-500 hover:text-emerald-600 transition-all shadow-sm"
+                  >
+                    <FiChevronLeft size={20} />
+                  </button>
+                  <div className="px-4 py-2 bg-white border border-slate-200 rounded-xl font-black text-emerald-600 shadow-sm">
+                    {currentPage} / {totalPages}
+                  </div>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="p-3 rounded-xl bg-white border border-slate-200 text-slate-600 disabled:opacity-30 hover:border-emerald-500 hover:text-emerald-600 transition-all shadow-sm"
+                  >
+                    <FiChevronRight size={20} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="bg-white border-2 border-dashed border-emerald-100 rounded-[2.5rem] py-20 text-center px-4">
+          <div className="bg-emerald-50 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6">
+            <FiBarChart2 className="text-emerald-500 text-3xl" />
+          </div>
+          <h3 className="text-xl font-bold text-slate-700">No marks report generated</h3>
+          <p className="text-slate-400 mt-2 max-w-xs mx-auto">Configure the batch and perspective settings above to view the departmental performance records.</p>
         </div>
       )}
-
-      {viewBy === "subject" && (
-        <div>
-          <label className="block mb-1 font-semibold text-gray-700">Select Subject</label>
-          <select
-            className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-            value={selectedSubject}
-            onChange={(e) => setSelectedSubject(e.target.value)}
-          >
-            <option value="">-- Select Subject --</option>
-            {subjects.map((s) => (
-              <option key={s._id} value={s._id}>{s.name}</option>
-            ))}
-          </select>
-        </div>
-      )}
-
-    
-
-      {/* Fetch Button */}
-      <button
-        onClick={fetchMarks}
-        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-      >
-        {loading ? "Fetching..." : "Get Marks"}
-      </button>
-  {/* Search Input */}
-  {marks.length > 0 && (
-        <input
-          type="text"
-          placeholder={`Search by ${viewBy === "student" ? "subject" : "student"} name...`}
-          value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-400 mt-4"
-        />
-      )}
-    {/* Marks Table */}
-{currentMarks.length > 0 && (
-  <div className="mt-6 overflow-x-auto">
-    <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden">
-      <thead className="bg-gray-100">
-        <tr>
-          {viewBy === "subject" && <th className="p-3 text-left text-gray-700">Roll No</th>}
-          {viewBy === "subject" && <th className="p-3 text-left text-gray-700">Student</th>}
-          {viewBy === "student" && <th className="p-3 text-left text-gray-700">Subject</th>}
-          {exams.map((exam) => (
-            <th key={exam} className="p-3 text-left text-gray-700">{exam}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {currentMarks.map((m, i) => (
-          <tr key={i} className="border-t hover:bg-gray-50">
-            {viewBy === "subject" && <td className="p-3">{m.rollNo || "-"}</td>}
-            {viewBy === "subject" && <td className="p-3">{m.name}</td>}
-            {viewBy === "student" && <td className="p-3">{m.name}</td>}
-            {exams.map((exam) => (
-              <td key={exam} className="p-3 font-semibold">
-                {m[exam] !== null && m[exam] !== undefined ? m[exam] : "-"}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-
-    {/* Pagination */}
-    <div className="flex justify-center items-center gap-4 mt-4">
-      <button
-        className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
-        onClick={() => setCurrentPage((p) => p - 1)}
-        disabled={currentPage === 1}
-      >
-        Previous
-      </button>
-      <span className="text-gray-700 font-medium">
-        Page {currentPage} of {totalPages}
-      </span>
-      <button
-        className="px-4 py-2 bg-gray-200 rounded-lg disabled:opacity-50"
-        onClick={() => setCurrentPage((p) => p + 1)}
-        disabled={currentPage === totalPages}
-      >
-        Next
-      </button>
-    </div>
-  </div>
-)}
     </div>
   );
 }
+
+const indexOfLastMark = 0; // Handled dynamically in currentMarks logic now
+const indexOfFirstMark = 0;

@@ -1,7 +1,10 @@
-// src/pages/studyMaterial/TeacherMaterialsManager.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import api from "../../../../utils/axiosInstance";
 import { toast } from "react-toastify";
+import { 
+  FiPlus, FiSearch, FiEdit3, FiTrash2, FiBook, 
+  FiFileText, FiFilter, FiUploadCloud, FiX, FiExternalLink, FiClock 
+} from "react-icons/fi";
 
 export default function TeacherMaterialsManager() {
   const [materials, setMaterials] = useState([]);
@@ -28,13 +31,11 @@ export default function TeacherMaterialsManager() {
   const [sortBy, setSortBy] = useState("title");
   const [sortOrder, setSortOrder] = useState("asc");
 
-  // Fetch subjects
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
         const res = await api.get("/teachers/subjects");
         setSubjects(res.data.subjects || []);
-
       } catch (err) {
         console.error(err);
       }
@@ -42,10 +43,8 @@ export default function TeacherMaterialsManager() {
     fetchSubjects();
   }, []);
 
-  // Fetch materials
   const fetchMaterials = async (subjectId = "all") => {
     setLoading(true);
-
     let url = "/study/teacher";
     if (subjectId !== "all") url += `?subject=${subjectId}`;
     try {
@@ -62,7 +61,6 @@ export default function TeacherMaterialsManager() {
     fetchMaterials(selectedSubject);
   }, [selectedSubject]);
 
-  // Open upload modal
   const openUploadModal = () => {
     setEditingMaterial(null);
     setTitle("");
@@ -72,7 +70,6 @@ export default function TeacherMaterialsManager() {
     setShowUploadModal(true);
   };
 
-  // Open edit modal
   const openEditModal = (material) => {
     setEditingMaterial(material);
     setTitle(material.title);
@@ -82,7 +79,6 @@ export default function TeacherMaterialsManager() {
     setShowUploadModal(true);
   };
 
-  // Handle upload / update
   const handleSave = async () => {
     if (!title || !formSubject || (!file && !editingMaterial)) {
       return toast.error("Please fill all required fields");
@@ -100,192 +96,256 @@ export default function TeacherMaterialsManager() {
         await api.put(`/study/${editingMaterial._id}`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-      toast.success("Material uploaded successfully");
+        toast.success("Material updated");
       } else {
         await api.post("/study/upload", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-        toast.success("Material uploaded successfully");
+        toast.success("New material published");
       }
       setShowUploadModal(false);
       fetchMaterials(selectedSubject);
     } catch (err) {
-      console.error(err);
       toast.error("Failed to save material");
     } finally {
       setLoadingUploadEdit(false);
     }
   };
 
-  // Delete material
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this material?")) return;
-
+    if (!window.confirm("Are you sure? This action cannot be undone.")) return;
     setLoadingDeleteId(id);
     try {
       await api.delete(`/study/${id}`);
       setMaterials(materials.filter((m) => m._id !== id));
-      toast.success("Material deleted successfully");
+      toast.success("Material removed");
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to delete material");
+      toast.error("Failed to delete");
     } finally {
       setLoadingDeleteId(null);
     }
   };
 
-  // Filter & sort
-  const filteredMaterials = materials
-    .filter(
-      (m) =>
+  const filteredMaterials = useMemo(() => {
+    return materials
+      .filter(m =>
         m.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         m.description.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      const aValue = sortBy === "title" ? a.title.toLowerCase() : new Date(a.createdAt);
-      const bValue = sortBy === "title" ? b.title.toLowerCase() : new Date(b.createdAt);
-      return sortOrder === "asc" ? (aValue < bValue ? -1 : aValue > bValue ? 1 : 0) : aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
-    });
+      )
+      .sort((a, b) => {
+        const aValue = sortBy === "title" ? a.title.toLowerCase() : new Date(a.createdAt);
+        const bValue = sortBy === "title" ? b.title.toLowerCase() : new Date(b.createdAt);
+        return sortOrder === "asc" ? (aValue < bValue ? -1 : 1) : (aValue > bValue ? -1 : 1);
+      });
+  }, [materials, searchTerm, sortBy, sortOrder]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between">
-      <h2 className="md:text-2xl text-xl font-bold mb-4">Study Materials</h2>
-      <button
-          onClick={openUploadModal}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-        >
-          + Upload 
-        </button>
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-10 min-h-screen bg-[#f8fafc]">
+      
+      {/* Header Section */}
+      <header className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-emerald-50">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Faculty Portal</span>
+            <h2 className="text-3xl font-black text-slate-800 tracking-tight">Study Materials</h2>
+          </div>
+          <p className="text-slate-500 font-medium italic">Upload, manage, and share resources with your students.</p>
         </div>
-      {/* Controls */}
-      <div className="flex flex-wrap gap-3 mb-4 items-center">
-        <select
-          className="border border-gray-300 rounded-lg p-2"
-          value={selectedSubject}
-          onChange={(e) => setSelectedSubject(e.target.value)}
+        <button
+          onClick={openUploadModal}
+          className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-2xl transition-all shadow-xl shadow-emerald-100 active:scale-95 font-bold"
         >
-          <option value="all">All Subjects</option>
-          {subjects.map((s) => (
-            <option key={s._id} value={s._id}>{s.name}</option>
-          ))}
-        </select>
+          <FiUploadCloud strokeWidth={2.5} /> Upload Resource
+        </button>
+      </header>
 
-        <input
-          type="text"
-          placeholder="Search by title or description"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="border border-gray-300 rounded-lg p-2 flex-1 min-w-[200px]"
-        />
+      {/* Advanced Filter Bar */}
+      <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 mb-8 flex flex-col xl:flex-row gap-4 items-center">
+        <div className="relative w-full xl:w-64">
+          <FiBook className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600" />
+          <select
+            value={selectedSubject}
+            onChange={(e) => setSelectedSubject(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 bg-slate-50 border-transparent rounded-xl font-bold text-slate-600 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition-all appearance-none outline-none"
+          >
+            <option value="all">All Subjects</option>
+            {subjects.map((s) => <option key={s._id} value={s._id}>{s.name}</option>)}
+          </select>
+        </div>
 
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="border border-gray-300 rounded-lg p-2"
-        >
-          <option value="title">Sort by Title</option>
-          <option value="date">Sort by Date</option>
-        </select>
+        <div className="relative flex-grow w-full">
+          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search by title or description..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 bg-slate-50 border-transparent rounded-xl font-bold text-slate-600 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
+          />
+        </div>
 
-        <select
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value)}
-          className="border border-gray-300 rounded-lg p-2"
-        >
-          <option value="asc">Ascending</option>
-          <option value="desc">Descending</option>
-        </select>
-
-       
+        <div className="flex gap-4 w-full xl:w-auto">
+          <div className="relative flex-1 xl:w-48">
+            <FiFilter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-white border-2 border-slate-50 rounded-xl font-bold text-slate-600 outline-none"
+            >
+              <option value="title">By Title</option>
+              <option value="date">By Date</option>
+            </select>
+          </div>
+          <button
+            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+            className="px-4 py-3 bg-white border-2 border-slate-50 text-slate-600 font-bold rounded-xl hover:border-emerald-500 transition-all"
+          >
+            {sortOrder === "asc" ? "↑ ASC" : "↓ DESC"}
+          </button>
+        </div>
       </div>
 
-      {/* Materials List */}
+      {/* Materials Grid */}
       {loading ? (
-        <p>Loading materials...</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[1, 2, 3].map(n => <div key={n} className="h-64 bg-white animate-pulse rounded-[2.5rem] border border-slate-100"></div>)}
+        </div>
       ) : filteredMaterials.length === 0 ? (
-        <p className="text-gray-500">No materials found.</p>
+        <div className="bg-white border-2 border-dashed border-emerald-100 rounded-[3rem] py-24 text-center">
+          <FiFileText className="mx-auto text-emerald-100 text-6xl mb-4" />
+          <p className="text-slate-400 font-bold italic">No materials found for your selection.</p>
+        </div>
       ) : (
-        <ul className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {filteredMaterials.map((m) => (
-            <li key={m._id} className="border border-gray-200 p-4 rounded-lg flex justify-between items-start hover:shadow-lg transition-shadow duration-200">
-              <div>
-                <h3 className="font-semibold text-lg">{m.title}</h3>
-                <p className="text-sm text-gray-600">{m.subject.name}</p>
-                <p className="mt-1 text-gray-500">{m.description}</p>
+            <div
+              key={m._id}
+              className="group bg-white border border-emerald-50 rounded-[2.5rem] p-8 shadow-sm hover:shadow-2xl hover:shadow-emerald-100/40 transition-all duration-500 flex flex-col relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-full -mr-12 -mt-12 opacity-50 transition-transform group-hover:scale-150"></div>
+              
+              <div className="relative flex-grow">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="bg-emerald-100 text-emerald-600 p-4 rounded-2xl shadow-inner">
+                    <FiFileText size={24} />
+                  </div>
+                  <div className="flex gap-1">
+                    <button onClick={() => openEditModal(m)} className="p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all">
+                      <FiEdit3 size={18} />
+                    </button>
+                    <button onClick={() => handleDelete(m._id)} className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
+                      {loadingDeleteId === m._id ? <div className="w-4 h-4 border-2 border-red-500 border-t-transparent animate-spin rounded-full"></div> : <FiTrash2 size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                <h3 className="text-xl font-black text-slate-800 mb-2 truncate group-hover:text-emerald-600 transition-colors">{m.title}</h3>
+                <p className="text-emerald-600 font-black text-xs mb-4 flex items-center gap-2 uppercase tracking-widest italic">
+                  <FiBook className="shrink-0" /> {m.subject.name}
+                </p>
+                <p className="text-slate-400 text-sm font-medium mb-8 line-clamp-3 leading-relaxed">
+                  {m.description || "No description provided for this resource."}
+                </p>
               </div>
-              <div className="flex gap-2 mt-2 sm:mt-0">
-                <a href={m.fileUrl} target="_blank" rel="noopener noreferrer" className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                  View
+
+              <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-slate-300 text-[10px] font-bold uppercase tracking-widest">
+                  <FiClock /> {new Date(m.createdAt).toLocaleDateString()}
+                </div>
+                <a 
+                  href={m.fileUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="bg-slate-900 hover:bg-emerald-600 text-white p-3 rounded-xl transition-all shadow-lg flex items-center gap-2"
+                >
+                  <span className="text-[10px] font-black uppercase px-1">View</span>
+                  <FiExternalLink size={14} />
                 </a>
-                <button
-                  onClick={() => openEditModal(m)}
-                  className="px-3 py-1 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition"
-                >
-                  {loadingUploadEdit && editingMaterial?._id === m._id ? "Updating..." : "Edit"}
-                </button>
-                <button
-                  onClick={() => handleDelete(m._id)}
-                  className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
-                >
-                  {loadingDeleteId === m._id ? "Deleting..." : "Delete"}
-                </button>
               </div>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
 
       {/* Upload/Edit Modal */}
       {showUploadModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md animate-fade-in">
-            <h3 className="text-xl font-bold mb-4">{editingMaterial ? "Edit Material" : "Upload Material"}</h3>
-
-            <div className="flex flex-col gap-3">
-              <select
-                className="border border-gray-300 rounded-lg p-2"
-                value={formSubject}
-                onChange={(e) => setFormSubject(e.target.value)}
-              >
-                <option value="">Select Subject</option>
-                {subjects.map((s) => (
-                  <option key={s._id} value={s._id}>{s.name}</option>
-                ))}
-              </select>
-
-              <input
-                type="text"
-                className="border border-gray-300 rounded-lg p-2"
-                placeholder="Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-
-              <textarea
-                className="border border-gray-300 rounded-lg p-2 resize-none h-24"
-                placeholder="Description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-
-              <input
-                type="file"
-                className="border border-gray-300 rounded-lg p-2"
-                onChange={(e) => setFile(e.target.files[0])}
-              />
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-300 max-h-[95vh] overflow-y-auto">
+            <div className="bg-emerald-600 p-10 text-white flex justify-between items-center relative">
+              <div className="relative z-10">
+                <h3 className="text-3xl font-black tracking-tight">{editingMaterial ? "Edit Resource" : "Upload Material"}</h3>
+                <p className="text-emerald-100 font-medium mt-1 italic">Knowledge Sharing</p>
+              </div>
+              <FiUploadCloud size={60} className="opacity-10 absolute right-10 top-10" />
+              <button onClick={() => setShowUploadModal(false)} className="absolute top-8 right-8 p-2 hover:bg-emerald-500 rounded-full transition-colors"><FiX size={24} /></button>
             </div>
+            
+            <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="p-10 space-y-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Associated Subject</label>
+                <select
+                  value={formSubject}
+                  onChange={(e) => setFormSubject(e.target.value)}
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 focus:border-emerald-500 focus:bg-white outline-none font-bold text-slate-700 appearance-none"
+                  required
+                >
+                  <option value="">Select Subject...</option>
+                  {subjects.map((s) => <option key={s._id} value={s._id}>{s.name}</option>)}
+                </select>
+              </div>
 
-            <div className="flex justify-end gap-3 mt-4">
-              <button onClick={() => setShowUploadModal(false)} className="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400 transition">Cancel</button>
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
-                disabled={loadingUploadEdit}
-              >
-                {loadingUploadEdit ? (editingMaterial ? "Updating..." : "Uploading...") : editingMaterial ? "Update" : "Upload"}
-              </button>
-            </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Material Title</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Unit 2: Data Structures PDF"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 focus:border-emerald-500 focus:bg-white outline-none font-bold text-slate-700 transition-all"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Resource Description</label>
+                <textarea
+                  placeholder="Briefly explain what this file contains..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 focus:border-emerald-500 focus:bg-white outline-none font-bold text-slate-700 transition-all"
+                  rows="3"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">File Upload</label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    onChange={(e) => setFile(e.target.files[0])}
+                    className="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-8 text-center text-slate-400 font-bold hover:border-emerald-500 hover:text-emerald-600 transition-all cursor-pointer"
+                  />
+                  {file && <p className="mt-2 text-xs font-black text-emerald-600 italic">Selected: {file.name}</p>}
+                </div>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowUploadModal(false)}
+                  className="flex-1 px-8 py-5 rounded-2xl bg-slate-100 text-slate-500 font-black hover:bg-slate-200 transition-colors uppercase tracking-widest text-[10px]"
+                >
+                  Discard
+                </button>
+                <button
+                  type="submit"
+                  disabled={loadingUploadEdit}
+                  className="flex-[2] px-8 py-5 rounded-2xl bg-emerald-600 text-white font-black hover:bg-emerald-700 shadow-xl shadow-emerald-100 transition-all uppercase tracking-widest text-[10px] disabled:opacity-50"
+                >
+                  {loadingUploadEdit ? "Processing..." : editingMaterial ? "Update Resource" : "Publish Material"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

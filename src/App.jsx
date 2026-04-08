@@ -36,6 +36,8 @@ import Performance from './pages/common/Performance/Performance';
 
 import AdminPlacements from './pages/department/Placement/Placements';
 import StudentPlacements from './pages/student/Placements';
+import AdminAttendanceInsights from './pages/common/Attendance/Admin/AdminAttendanceInsights';
+import HODAttendanceView from './pages/common/Attendance/HOD/HODAttendanceView';
 
 export default function App() {
 
@@ -54,7 +56,7 @@ const routes=createBrowserRouter(
         {path:"/profile",element:<Profile/>},
         { path: "admin/dashboard", element: <AdminDashboard /> },
         { path: "admin/manageUser", element: <ManageUsers /> },
-        { path: "/admin/departments", element: <ManageDepartments /> },
+        { path: "/admin/departments", element: <ManageDepartments /> },{ path: "/admin/Attendance", element: <AdminAttendanceInsights /> },
         // 🔹 Teacher Routes
         { path: "teacher/dashboard", element: <TeacherDashboard /> },
         { path: "teacher/assignments", element: <Assignments /> },
@@ -74,6 +76,7 @@ const routes=createBrowserRouter(
         { path: "/department/exams", element: <Exams /> },
         { path: "/department/marks", element: <DepartmentMarksViewer /> },{ path: "/department/placement", element: <AdminPlacements /> },
         { path: "/department/performance", element: <Performance /> },
+        { path: "/department/Attendance", element: <HODAttendanceView /> },
         
 
 
