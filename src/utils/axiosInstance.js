@@ -3,8 +3,8 @@ import store from "../redux/store";
 import { loginSuccess, logout } from "../redux/slice/userSlice";
 
 const api = axios.create({
-  // baseURL: "https://major-project-backend-roan.vercel.app/api",
-  baseURL: "http://localhost:3005/api",
+  baseURL: "https://major-project-backend-roan.vercel.app/api",
+  // baseURL: "http://localhost:3005/api",
 
 });
 
