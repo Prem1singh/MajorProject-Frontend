@@ -105,7 +105,7 @@ export default function ManageDepartments() {
       {/* --- Page Header --- */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-8 rounded-[2.5rem] border border-emerald-50 shadow-sm">
         <div>
-          <h2 className="text-3xl font-black italic text-slate-800 tracking-tighter uppercase leading-none flex items-center gap-3">
+          <h2 className="text-xl md:text-xl md:text-3xl font-black italic text-slate-800 tracking-tighter uppercase leading-none flex items-center gap-3">
              <FiLayers className="text-emerald-500" /> Departments
           </h2>
           <p className="text-emerald-600 text-[10px] font-black uppercase tracking-[0.3em] mt-2 italic">Institutional Hierarchy Management</p>
@@ -268,7 +268,7 @@ export default function ManageDepartments() {
         </div>
       )}
 
-      <p className="text-center mt-10 text-slate-300 text-[10px] font-black uppercase tracking-[0.5em] italic">UniTrack Infrastructure Authority • S-NODE-01</p>
+     
     </div>
   );
 }

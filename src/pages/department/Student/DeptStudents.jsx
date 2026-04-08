@@ -63,7 +63,7 @@ export default function HODAttendanceView() {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider italic">Department Audit</span>
-            <h2 className="text-3xl font-black italic text-slate-800 tracking-tighter uppercase leading-none">Attendance Insights</h2>
+            <h2 className="text-xl md:text-3xl font-black italic text-slate-800 tracking-tighter uppercase leading-none">Attendance Insights</h2>
           </div>
           <p className="text-slate-500 font-medium italic text-sm">Monitor student eligibility and subject-wise performance.</p>
         </div>
@@ -148,7 +148,7 @@ export default function HODAttendanceView() {
               <div className="bg-white rounded-[3rem] border border-emerald-50 shadow-2xl p-8 lg:p-12 animate-in zoom-in-95 duration-500">
                 <div className="flex justify-between items-center mb-10 border-b border-slate-50 pb-8">
                    <div>
-                      <h3 className="text-2xl font-black italic text-slate-800 uppercase tracking-tighter leading-none">{selectedSubjData.subjectName}</h3>
+                      <h3 className="text-xl md:text-2xl font-black italic text-slate-800 uppercase tracking-tighter leading-none">{selectedSubjData.subjectName}</h3>
                       <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] italic mt-2 italic">Student Eligibility Audit</p>
                    </div>
                    <div className="bg-slate-50 border border-slate-100 px-6 py-3 rounded-2xl text-center shadow-inner">

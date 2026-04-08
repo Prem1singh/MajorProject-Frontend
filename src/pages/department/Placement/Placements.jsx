@@ -144,7 +144,7 @@ export default function AdminPlacements() {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Placement Portal</span>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight">Recruitment Management</h2>
+            <h2 className="text-xl md:text-3xl font-black text-slate-800 tracking-tight">Recruitment Management</h2>
           </div>
           <p className="text-slate-500 font-medium italic">Oversee campus drives and student career opportunities.</p>
         </div>
@@ -213,7 +213,7 @@ export default function AdminPlacements() {
                   </div>
                 </div>
 
-                <h2 className="text-2xl font-black text-slate-800 mb-2 truncate leading-tight">{p.company}</h2>
+                <h2 className="text-xl md:text-2xl font-black text-slate-800 mb-2 truncate leading-tight">{p.company}</h2>
                 <p className="text-emerald-600 font-black text-sm mb-4 tracking-wide uppercase italic">{p.role}</p>
                 
                 <div className="space-y-3 mb-6">
@@ -247,7 +247,7 @@ export default function AdminPlacements() {
           <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-300 max-h-[95vh] overflow-y-auto">
             <div className="bg-emerald-600 p-10 text-white flex justify-between items-center relative">
               <div className="relative z-10">
-                <h3 className="text-3xl font-black tracking-tight">{editingPlacement ? "Edit Drive Info" : "Post Recruitment"}</h3>
+                <h3 className="text-xl md:text-3xl font-black tracking-tight">{editingPlacement ? "Edit Drive Info" : "Post Recruitment"}</h3>
                 <p className="text-emerald-100 font-medium mt-1 italic">Authorized Admin Action</p>
               </div>
               <FiBriefcase size={60} className="opacity-10 absolute right-10 top-10" />

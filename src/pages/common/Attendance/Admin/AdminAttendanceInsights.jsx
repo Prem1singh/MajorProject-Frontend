@@ -94,7 +94,7 @@ export default function AdminAttendanceInsights() {
       {/* Header */}
       <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between bg-white p-8 rounded-[2.5rem] border border-emerald-50 shadow-sm gap-4">
         <div>
-          <h2 className="text-3xl font-black italic text-slate-800 tracking-tighter uppercase leading-none flex items-center gap-3">
+          <h2 className="text-xl md:text-xl md:text-3xl font-black italic text-slate-800 tracking-tighter uppercase leading-none flex items-center gap-3">
              <FiShield className="text-emerald-500" /> Audit Center
           </h2>
           <p className="text-emerald-600 text-[10px] font-black uppercase tracking-[0.3em] mt-2 italic">
@@ -204,7 +204,7 @@ export default function AdminAttendanceInsights() {
               <div className="bg-white rounded-[3.5rem] border border-emerald-50 shadow-2xl p-8 lg:p-12 animate-in zoom-in-95 duration-500">
                 <div className="flex justify-between items-center mb-10 pb-6 border-b border-slate-50">
                    <div>
-                      <h3 className="text-2xl font-black italic text-slate-800 uppercase tracking-tighter leading-none">{selectedSubjData.subjectName}</h3>
+                      <h3 className="text-xl md:text-2xl font-black italic text-slate-800 uppercase tracking-tighter leading-none">{selectedSubjData.subjectName}</h3>
                       <p className="text-emerald-500 font-black text-[9px] uppercase tracking-widest mt-2 italic">Detailed Performance Roster</p>
                    </div>
                    <span className="bg-slate-100 px-4 py-2 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest italic border border-slate-200">{selectedSubjData.subjectCode}</span>

@@ -53,7 +53,7 @@ export default function StudentPlacements() {
           <div className="bg-emerald-600 p-2.5 rounded-2xl text-white shadow-xl shadow-emerald-100">
             <FiBriefcase size={24} />
           </div>
-          <h2 className="text-3xl font-black text-slate-800 tracking-tight italic">Placement Cell</h2>
+          <h2 className="text-xl md:text-xl md:text-3xl font-black text-slate-800 tracking-tight italic">Placement Cell</h2>
         </div>
         <p className="text-slate-500 font-medium italic">Explore active recruitment drives and kickstart your professional journey.</p>
       </header>
@@ -99,7 +99,7 @@ export default function StudentPlacements() {
       ) : filteredPlacements.length === 0 ? (
         <div className="bg-white border-2 border-dashed border-emerald-100 rounded-[3rem] py-28 text-center px-4">
           <div className="bg-emerald-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <FiInfo className="text-emerald-500 text-3xl" />
+            <FiInfo className="text-emerald-500 text-xl md:text-3xl" />
           </div>
           <h3 className="text-xl font-bold text-slate-700 tracking-tight">No Active Drives</h3>
           <p className="text-slate-400 mt-2 max-w-sm mx-auto italic">We couldn't find any placement opportunities matching your criteria or batch.</p>
@@ -124,7 +124,7 @@ export default function StudentPlacements() {
                   </span>
                 </div>
 
-                <h2 className="text-2xl font-black text-slate-800 mb-1 group-hover:text-emerald-600 transition-colors truncate">
+                <h2 className="text-xl md:text-2xl font-black text-slate-800 mb-1 group-hover:text-emerald-600 transition-colors truncate">
                   {p.company}
                 </h2>
                 <p className="text-emerald-600 font-black text-xs mb-6 uppercase tracking-widest italic flex items-center gap-2">

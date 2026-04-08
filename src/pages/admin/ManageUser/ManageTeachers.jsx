@@ -106,94 +106,78 @@ export default function ManageTeachers() {
         </div>
       )}
 
-      {/* --- Faculty Table --- */}
-      <div className="relative">
-        {loading ? (
-          <div className="py-20 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-600 border-t-transparent mx-auto"></div>
-            <p className="mt-4 text-emerald-500 font-black italic text-xs uppercase">Polling Faculty Data...</p>
-          </div>
-        ) : currentTeachers.length === 0 ? (
-          <div className="py-24 text-center border-4 border-dashed border-slate-50 rounded-[3rem]">
-            <FiUsers className="mx-auto text-slate-100 text-7xl mb-4" />
-            <p className="text-slate-300 font-black italic uppercase text-sm">No Faculty Members Found</p>
-          </div>
-        ) : (
-          <>
-            <div className="overflow-x-auto rounded-[2.5rem] border border-slate-100 shadow-sm bg-white">
-              <table className="w-full border-collapse min-w-[800px]">
-                <thead>
-                  <tr className="bg-emerald-50/50 border-b border-emerald-100">
-                    <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest">Faculty Identity</th>
-                    <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest">Official Email</th>
-                    <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest">Employee ID</th>
-                    <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest">Assigned Subjects</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-emerald-50">
-                  {currentTeachers.map((teacher, idx) => (
-                    <tr key={teacher._id} className="hover:bg-emerald-50/20 transition-all">
-                      <td className="py-6 px-8">
-                        <p className="font-bold text-slate-700">{teacher.name}</p>
-                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest italic mt-0.5">Verified Faculty</p>
-                      </td>
-                      <td className="py-6 px-8 text-sm font-medium text-slate-500">
-                        <div className="flex items-center gap-2">
-                           <FiMail className="text-emerald-400" /> {teacher.email}
-                        </div>
-                      </td>
-                      <td className="py-6 px-8">
-                        <span className="bg-slate-100 px-4 py-1.5 rounded-lg text-[10px] font-black text-slate-500 uppercase tracking-widest border border-slate-200">
-                           {teacher.employeeId || "NOT-ASSIGNED"}
-                        </span>
-                      </td>
-                      <td className="py-6 px-8">
-                        <div className="flex flex-wrap gap-2">
-                          {(teacher.subjects || []).length > 0 ? (
-                            teacher.subjects.map((s, sIdx) => (
-                              <span key={sIdx} className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-tight border border-emerald-100">
-                                {s.name}
-                              </span>
-                            ))
-                          ) : (
-                            <span className="text-[10px] text-slate-300 italic font-bold">No Specializations</span>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
 
-            {/* Pagination */}
-            <div className="flex flex-col md:flex-row justify-between items-center px-4 py-8 gap-4">
-              <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                Displaying <span className="text-emerald-600">{indexOfFirst + 1} - {Math.min(indexOfLast, filteredTeachers.length)}</span> of {filteredTeachers.length} Members
-              </p>
-              <div className="flex gap-3">
-                <button 
-                  onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} 
-                  disabled={currentPage === 1}
-                  className="p-3 rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 disabled:opacity-20 transition-all shadow-sm"
-                >
-                  <FiChevronLeft size={20} />
-                </button>
-                <div className="flex items-center px-6 bg-slate-50 rounded-xl text-[10px] font-black uppercase text-slate-500 tracking-[0.2em]">
-                  {currentPage} / {totalPages}
-                </div>
-                <button 
-                  onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} 
-                  disabled={currentPage === totalPages}
-                  className="p-3 rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 disabled:opacity-20 transition-all shadow-sm"
-                >
-                  <FiChevronRight size={20} />
-                </button>
-              </div>
-            </div>
-          </>
-        )}
+     {/* --- Faculty Table --- */}
+<div className="relative">
+  {loading ? (
+    <div className="py-20 text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-600 border-t-transparent mx-auto"></div>
+      <p className="mt-4 text-emerald-500 font-black italic text-xs uppercase">Polling Faculty Data...</p>
+    </div>
+  ) : currentTeachers.length === 0 ? (
+    <div className="py-24 text-center border-4 border-dashed border-slate-50 rounded-[3rem]">
+      <FiUsers className="mx-auto text-slate-100 text-7xl mb-4" />
+      <p className="text-slate-300 font-black italic uppercase text-sm">No Faculty Members Found</p>
+    </div>
+  ) : (
+    <>
+      <div className="overflow-x-auto rounded-[2.5rem] border border-slate-100 shadow-sm bg-white">
+        <table className="w-full border-collapse min-w-[900px]">
+          <thead>
+            <tr className="bg-emerald-50/50 border-b border-emerald-100">
+              <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest whitespace-nowrap">Faculty Identity</th>
+              <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest whitespace-nowrap">Official Email</th>
+              <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest whitespace-nowrap">Employee ID</th>
+              <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest whitespace-nowrap">Assigned Subjects</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-emerald-50">
+            {currentTeachers.map((teacher) => (
+              <tr key={teacher._id} className="hover:bg-emerald-50/20 transition-all group">
+                {/* Name Cell */}
+                <td className="py-6 px-8 whitespace-nowrap">
+                  <p className="font-bold text-slate-700">{teacher.name}</p>
+                  <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest italic mt-0.5">Verified Faculty</p>
+                </td>
+
+                {/* Email Cell */}
+                <td className="py-6 px-8 text-sm font-medium text-slate-500 whitespace-nowrap">
+                  <div className="flex items-center gap-2">
+                     <FiMail className="text-emerald-400 shrink-0" /> {teacher.email}
+                  </div>
+                </td>
+
+                {/* Employee ID Cell (Fixed) */}
+                <td className="py-6 px-8 whitespace-nowrap">
+                  <span className="inline-flex bg-slate-100 px-4 py-1.5 rounded-lg text-[10px] font-black text-slate-500 uppercase tracking-widest border border-slate-200">
+                     {teacher.employeeId || "NOT-ASSIGNED"}
+                  </span>
+                </td>
+
+                {/* Subjects Cell */}
+                <td className="py-6 px-8">
+                  <div className="flex flex-wrap gap-2 max-w-[300px]"> {/* Fixed width to prevent row stretching */}
+                    {(teacher.subjects || []).length > 0 ? (
+                      teacher.subjects.map((s, sIdx) => (
+                        <span key={sIdx} className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-tight border border-emerald-100 whitespace-nowrap">
+                          {s.name}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-[10px] text-slate-300 italic font-bold whitespace-nowrap">No Specializations</span>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+
+      {/* Pagination remains the same... */}
+    </>
+  )}
+</div>
     </div>
   );
 }

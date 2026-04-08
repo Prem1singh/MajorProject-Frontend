@@ -163,7 +163,7 @@ export default function TeacherAssignments() {
             <div className="bg-emerald-600 p-2.5 rounded-2xl text-white shadow-xl shadow-emerald-100">
               <FiAward size={24} />
             </div>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight italic">Assignment Console</h2>
+            <h2 className="text-xl md:text-xl md:text-3xl font-black text-slate-800 tracking-tight italic">Assignment Console</h2>
           </div>
           <p className="text-slate-500 font-medium italic">Create academic tasks and evaluate student performance.</p>
         </div>
@@ -228,7 +228,7 @@ export default function TeacherAssignments() {
                     </div>
                   </div>
 
-                  <h3 className="text-2xl font-black text-slate-800 mb-2 truncate group-hover:text-emerald-600 transition-colors">{assignment.title}</h3>
+                  <h3 className="text-xl md:text-2xl font-black text-slate-800 mb-2 truncate group-hover:text-emerald-600 transition-colors">{assignment.title}</h3>
                   <p className="text-emerald-600 font-black text-xs mb-6 uppercase tracking-widest italic">{assignment.subject?.name || "General"}</p>
                   <p className="text-slate-400 text-sm font-medium mb-8 line-clamp-2 leading-relaxed italic">{assignment.description}</p>
                   
@@ -270,7 +270,7 @@ export default function TeacherAssignments() {
             <div className="flex items-center gap-4">
                <div className="bg-emerald-50 p-4 rounded-2xl text-emerald-600 font-black italic">GRADING</div>
                <div>
-                  <h3 className="text-2xl font-black text-slate-800 tracking-tight">{selectedAssignment.title}</h3>
+                  <h3 className="text-xl md:text-xl md:text-2xl font-black text-slate-800 tracking-tight">{selectedAssignment.title}</h3>
                   <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">{selectedAssignment.subject?.name}</p>
                </div>
             </div>
@@ -330,7 +330,7 @@ export default function TeacherAssignments() {
                     <div className="flex gap-2 flex-grow">
                         <button 
                           onClick={() => handleUpdateSubmission(s._id, { obtainedMarks: s.obtainedMarks, status: "graded" }, s.obtainedMarks)}
-                          className="flex-grow py-3 bg-emerald-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-700 shadow-lg shadow-emerald-100 transition-all"
+                          className="flex-grow py-3 px-3 bg-emerald-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-700 shadow-lg shadow-emerald-100 transition-all"
                         >
                           {s.status === "graded" ? "Update Grade" : "Grade"}
                         </button>
@@ -356,7 +356,7 @@ export default function TeacherAssignments() {
           <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-300 max-h-[95vh] overflow-y-auto">
             <div className="bg-emerald-600 p-10 text-white flex justify-between items-center relative">
               <div className="relative z-10">
-                <h3 className="text-3xl font-black tracking-tight">{editingAssignment ? "Edit Task" : "New Task"}</h3>
+                <h3 className="text-xl md:text-3xl font-black tracking-tight">{editingAssignment ? "Edit Task" : "New Task"}</h3>
                 <p className="text-emerald-100 font-medium mt-1 italic">Academic Curriculum Update</p>
               </div>
               <FiFileText size={60} className="opacity-10 absolute right-10 top-10" />

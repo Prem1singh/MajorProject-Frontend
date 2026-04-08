@@ -143,7 +143,7 @@ export default function Exams() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">HOD Access</span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight">Exams Portal</h2>
+            <h2 className="text-xl md:text-2xl sm:text-xl md:text-3xl font-black text-slate-800 tracking-tight">Exams Portal</h2>
           </div>
           <p className="text-slate-500 text-sm sm:text-base font-medium">Manage and monitor academic assessments.</p>
         </div>
@@ -178,7 +178,7 @@ export default function Exams() {
       {!selectedBatch ? (
         <div className="flex flex-col items-center justify-center py-16 sm:py-24 text-center px-4">
           <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mb-6">
-            <FiAlertCircle className="text-emerald-500 text-3xl" />
+            <FiAlertCircle className="text-emerald-500 text-xl md:text-3xl" />
           </div>
           <h3 className="text-xl font-bold text-slate-700">Select a batch to begin</h3>
           <p className="text-slate-500 mt-2 max-w-xs text-sm">Please select an active batch from the dropdown to manage exam records.</p>
@@ -216,7 +216,7 @@ export default function Exams() {
                 </div>
               </div>
 
-              <h4 className="text-xl sm:text-2xl font-black text-slate-800 mb-3 leading-tight">{ex.name}</h4>
+              <h4 className="text-xl sm:text-xl md:text-2xl font-black text-slate-800 mb-3 leading-tight">{ex.name}</h4>
               <p className="text-slate-500 text-sm font-medium mb-8 flex-grow line-clamp-3">
                 {ex.description || "No description provided for this evaluation."}
               </p>
@@ -224,7 +224,7 @@ export default function Exams() {
               <div className="flex items-center justify-between border-t border-slate-50 pt-6 mt-auto">
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Weightage</span>
-                  <span className="text-2xl font-black text-slate-800">{ex.totalMarks} <span className="text-xs font-medium text-slate-400 italic">Marks</span></span>
+                  <span className="text-xl md:text-2xl font-black text-slate-800">{ex.totalMarks} <span className="text-xs font-medium text-slate-400 italic">Marks</span></span>
                 </div>
                 
                 {/* <button 
@@ -253,7 +253,7 @@ export default function Exams() {
             
             <div className="bg-emerald-600 p-8 sm:p-10 text-white flex justify-between items-center sticky top-0 z-10">
               <div>
-                <h3 className="text-2xl sm:text-3xl font-black">{editingExam ? "Edit Exam" : "New Exam"}</h3>
+                <h3 className="text-xl md:text-2xl sm:text-xl md:text-3xl font-black">{editingExam ? "Edit Exam" : "New Exam"}</h3>
                 <p className="text-emerald-100 text-xs sm:text-sm font-medium">Define assessment parameters</p>
               </div>
               <button onClick={closeModal} className="p-2 hover:bg-emerald-500 rounded-full transition-colors">

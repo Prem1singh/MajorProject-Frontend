@@ -94,7 +94,7 @@ export default function DepartmentMarksViewer() {
       <header className="mb-10">
         <div className="flex items-center gap-3 mb-2">
           <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">HOD Analytics</span>
-          <h2 className="text-3xl font-black text-slate-800 tracking-tight">Department Marks Viewer</h2>
+          <h2 className="text-xl md:text-3xl font-black text-slate-800 tracking-tight">Department Marks Viewer</h2>
         </div>
         <p className="text-slate-500 font-medium">Analyze student performance across subjects and examinations.</p>
       </header>
@@ -262,7 +262,7 @@ export default function DepartmentMarksViewer() {
       ) : (
         <div className="bg-white border-2 border-dashed border-emerald-100 rounded-[2.5rem] py-20 text-center px-4">
           <div className="bg-emerald-50 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6">
-            <FiBarChart2 className="text-emerald-500 text-3xl" />
+            <FiBarChart2 className="text-emerald-500 text-xl md:text-3xl" />
           </div>
           <h3 className="text-xl font-bold text-slate-700">No marks report generated</h3>
           <p className="text-slate-400 mt-2 max-w-xs mx-auto">Configure the batch and perspective settings above to view the departmental performance records.</p>

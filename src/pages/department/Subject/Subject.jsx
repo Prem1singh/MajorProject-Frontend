@@ -155,7 +155,7 @@ export default function Subjects() {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Curriculum Admin</span>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight">Subject Management</h2>
+            <h2 className="text-xl md:text-3xl font-black text-slate-800 tracking-tight">Subject Management</h2>
           </div>
           <p className="text-slate-500 font-medium">Define course syllabus, assign faculty, and manage credits.</p>
         </div>
@@ -282,7 +282,7 @@ export default function Subjects() {
           <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-300 max-h-[95vh] overflow-y-auto">
             <div className="bg-emerald-600 p-10 text-white flex justify-between items-center relative">
               <div className="relative z-10">
-                <h3 className="text-3xl font-black tracking-tight">{editingSubject ? "Edit Curriculum" : "Add Subject"}</h3>
+                <h3 className="text-xl md:text-3xl font-black tracking-tight">{editingSubject ? "Edit Curriculum" : "Add Subject"}</h3>
                 <p className="text-emerald-100 font-medium mt-1 italic">Course Structure Definition</p>
               </div>
               <FiAward size={60} className="opacity-10 absolute right-10 top-10" />

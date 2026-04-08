@@ -62,7 +62,7 @@ export default function HODAttendanceView() {
       {/* Header - Simple & Clean */}
       <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-8 rounded-[2.5rem] border border-emerald-50 shadow-sm">
         <div>
-          <h2 className="text-3xl font-black italic text-slate-800 tracking-tighter uppercase leading-none flex items-center gap-3">
+          <h2 className="text-xl md:text-xl md:text-3xl font-black italic text-slate-800 tracking-tighter uppercase leading-none flex items-center gap-3">
              <FiActivity className="text-emerald-500" /> Dept. Audit
           </h2>
           <p className="text-emerald-600 text-[10px] font-black uppercase tracking-[0.3em] mt-2 italic">
@@ -143,7 +143,7 @@ export default function HODAttendanceView() {
               <div className="bg-white rounded-[3.5rem] border border-emerald-50 shadow-2xl p-8 lg:p-12 animate-in zoom-in-95 duration-500">
                 <div className="flex justify-between items-center mb-10 border-b border-slate-50 pb-8">
                    <div>
-                      <h3 className="text-2xl font-black italic text-slate-800 uppercase tracking-tighter leading-none">{selectedSubjData.subjectName}</h3>
+                      <h3 className="text-xl md:text-2xl font-black italic text-slate-800 uppercase tracking-tighter leading-none">{selectedSubjData.subjectName}</h3>
                       <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mt-2 italic">Student Eligibility Audit</p>
                    </div>
                    <div className="text-right">

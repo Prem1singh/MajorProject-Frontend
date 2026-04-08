@@ -100,7 +100,7 @@ export default function ProfileTab() {
       {/* Header */}
       <div className="mb-10 flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-black italic text-slate-800 tracking-tighter uppercase">User Identity </h2>
+          <h2 className="text-xl md:text-3xl font-black italic text-slate-800 tracking-tighter uppercase">User Identity </h2>
           <p className="text-emerald-600 text-[10px] font-black uppercase tracking-[0.3em] mt-1 italic">Verified Account Profile</p>
         </div>
         <button 
@@ -123,7 +123,7 @@ export default function ProfileTab() {
               alt="Avatar"
             />
             <div className="mt-4 sm:mt-12">
-              <h3 className="text-2xl font-black italic text-slate-800 mt-6 uppercase tracking-tighter leading-none">{user?.name}</h3>
+              <h3 className="text-xl md:text-2xl font-black italic text-slate-800 mt-6 uppercase tracking-tighter leading-none">{user?.name}</h3>
               <p className="mt-2 inline-block bg-emerald-50 text-emerald-600 px-3 py-1 rounded-lg font-black text-[9px] uppercase tracking-widest border border-emerald-100">{user?.role}</p>
             </div>
           </div>

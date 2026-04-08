@@ -105,7 +105,7 @@ export default function StudentAssignmentsView() {
             <div className="bg-emerald-600 p-2.5 rounded-2xl text-white shadow-xl shadow-emerald-100">
               <FiBook size={24} />
             </div>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight italic">Assignments</h2>
+            <h2 className="text-xl md:text-xl md:text-3xl font-black text-slate-800 tracking-tight italic">Assignments</h2>
           </div>
           <p className="text-slate-500 font-medium italic">Manage your submissions and track grading feedback.</p>
         </div>
@@ -226,7 +226,7 @@ export default function StudentAssignmentsView() {
                                 <FiStar />
                             </div>
                         ) : (
-                            <FiCheckCircle className="text-emerald-500 text-2xl" />
+                            <FiCheckCircle className="text-emerald-500 text-xl md:text-2xl" />
                         )}
                     </div>
                     

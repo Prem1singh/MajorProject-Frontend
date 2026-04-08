@@ -128,7 +128,7 @@ export default function StudentAttendance() {
             <div className="bg-emerald-600 p-3 rounded-2xl text-white shadow-2xl shadow-emerald-200">
               <FiCalendar size={24} />
             </div>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tighter italic uppercase">Attendance Node</h2>
+            <h2 className="text-xl md:text-3xl font-black text-slate-800 tracking-tighter italic uppercase">Attendance Node</h2>
           </div>
           <p className="text-emerald-600 text-[10px] font-black uppercase tracking-[0.3em] italic">Student Tracking System / CUH</p>
         </div>

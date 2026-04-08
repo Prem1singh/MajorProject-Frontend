@@ -86,7 +86,7 @@ export default function BatchPerformance() {
       <header className="mb-10">
         <div className="flex items-center gap-3 mb-2">
           <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">HOD Insights</span>
-          <h2 className="text-3xl font-black text-slate-800 tracking-tight">Performance Analytics</h2>
+          <h2 className="text-xl md:text-3xl font-black text-slate-800 tracking-tight">Performance Analytics</h2>
         </div>
         <p className="text-slate-500 font-medium">Tracking batch trends and academic excellence.</p>
       </header>
@@ -208,7 +208,7 @@ export default function BatchPerformance() {
           <div className="bg-emerald-50 w-24 h-24 rounded-[2rem] flex items-center justify-center mx-auto mb-6 rotate-12">
             <FiActivity className="text-emerald-500 text-4xl" />
           </div>
-          <h3 className="text-2xl font-black text-slate-700">Analytics Engine Ready</h3>
+          <h3 className="text-xl md:text-2xl font-black text-slate-700">Analytics Engine Ready</h3>
           <p className="text-slate-400 mt-2 max-w-sm mx-auto">Select a batch and initiate analysis to visualize performance patterns.</p>
         </div>
       )}
@@ -219,7 +219,7 @@ export default function BatchPerformance() {
 function StatCard({ icon, label, value, color, bg }) {
   return (
     <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5">
-      <div className={`${bg} ${color} w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-inner`}>
+      <div className={`${bg} ${color} w-14 h-14 rounded-2xl flex items-center justify-center text-xl md:text-2xl shadow-inner`}>
         {icon}
       </div>
       <div className="flex-1 min-w-0">

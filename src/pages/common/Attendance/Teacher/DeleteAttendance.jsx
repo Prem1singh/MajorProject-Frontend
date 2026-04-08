@@ -65,7 +65,7 @@ export default function DeleteAttendance() {
       <div className="bg-rose-600 p-8 text-white">
         <div className="flex items-center gap-3 mb-2">
             <FiAlertTriangle size={24} className="animate-pulse" />
-            <h2 className="text-2xl font-black italic tracking-tight uppercase">
+            <h2 className="text-xl md:text-2xl font-black italic tracking-tight uppercase">
                 Wipe Attendance Log
             </h2>
         </div>

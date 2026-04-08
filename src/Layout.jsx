@@ -43,7 +43,7 @@ export default function Layout() {
           
           <div className="flex items-center gap-2 group cursor-default">
             <div className="w-9 h-9 bg-emerald-600 rounded-xl rotate-3 flex items-center justify-center text-white font-black italic shadow-lg shadow-emerald-200">U</div>
-            <span className="font-black italic text-slate-800 tracking-tighter text-2xl hidden sm:block">UniTrack</span>
+            <span className="font-black italic text-slate-800 tracking-tighter text-xl md:text-2xl hidden sm:block">UniTrack</span>
           </div>
         </div>
 

@@ -53,7 +53,7 @@ export default function Marks() {
       <div className="mb-10">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
           <div>
-            <h2 className="text-3xl font-black italic text-slate-800 tracking-tighter uppercase leading-none flex items-center gap-3">
+            <h2 className="text-xl md:text-3xl font-black italic text-slate-800 tracking-tighter uppercase leading-none flex items-center gap-3">
               <FiAward className="text-emerald-500" /> Marks Management
             </h2>
             <p className="text-emerald-600 text-[10px] font-black uppercase tracking-[0.3em] mt-2 italic ml-1">
@@ -109,15 +109,7 @@ export default function Marks() {
            )}
         </div>
 
-        {/* Action Status Footer */}
-        <div className="mt-12 pt-8 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-4 opacity-30">
-            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 italic">
-              Marks Encryption: AES-256 Active
-            </span>
-            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-400 italic">
-              UniTrack Academic Registry • {new Date().getFullYear()}
-            </span>
-        </div>
+       
       </div>
     </div>
   );

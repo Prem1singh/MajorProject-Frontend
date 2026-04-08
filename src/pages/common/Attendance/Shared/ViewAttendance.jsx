@@ -134,7 +134,7 @@ export default function ViewAttendance() {
       <div className="bg-emerald-600 p-8 text-white">
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
           <div>
-            <h2 className="text-2xl font-black italic tracking-tight flex items-center gap-3 uppercase">
+            <h2 className="text-xl md:text-xl md:text-2xl font-black italic tracking-tight flex items-center gap-3 uppercase">
               <FiEye /> {isSummary ? "Attendance Summary" : "Daily Log View"}
             </h2>
             <p className="text-emerald-100/80 text-[10px] font-black uppercase tracking-[0.2em] mt-1">

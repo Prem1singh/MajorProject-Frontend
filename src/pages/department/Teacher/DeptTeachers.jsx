@@ -126,7 +126,7 @@ export default function Teachers() {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Faculty Admin</span>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight">Teacher Directory</h2>
+            <h2 className="text-xl md:text-3xl font-black text-slate-800 tracking-tight">Teacher Directory</h2>
           </div>
           <p className="text-slate-500 font-medium italic">Manage department faculty, credentials, and access.</p>
         </div>
@@ -237,7 +237,7 @@ export default function Teachers() {
           <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-300">
             <div className="bg-emerald-600 p-10 text-white flex justify-between items-center relative">
               <div className="relative z-10">
-                <h3 className="text-3xl font-black tracking-tight">{isEditModalOpen ? "Edit Profile" : "New Faculty"}</h3>
+                <h3 className="text-xl md:text-3xl font-black tracking-tight">{isEditModalOpen ? "Edit Profile" : "New Faculty"}</h3>
                 <p className="text-emerald-100 font-medium mt-1 italic">Administrative Onboarding</p>
               </div>
               <FiUser size={60} className="opacity-10 absolute right-10 top-10" />

@@ -48,7 +48,7 @@ export default function ForgetPassword() {
         {/* Branding */}
         <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-slate-900 rounded-[2.5rem] shadow-2xl shadow-slate-200 -rotate-6 mb-6 border-4 border-white">
-                <FiShield className="text-emerald-500 text-3xl" />
+                <FiShield className="text-emerald-500 text-xl md:text-3xl" />
             </div>
             <h1 className="text-4xl font-black italic text-slate-800 tracking-tighter uppercase leading-none">Security</h1>
             <p className="text-emerald-600 text-[10px] font-black uppercase tracking-[0.4em] mt-2 italic">Reset your access key</p>

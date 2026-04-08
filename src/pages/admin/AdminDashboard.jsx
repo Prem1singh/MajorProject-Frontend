@@ -66,7 +66,7 @@ export default function AdminDashboard() {
       {/* Page Title */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black italic text-slate-800 tracking-tight uppercase">Admin Console</h1>
+          <h1 className="text-xl md:text-xl md:text-3xl font-black italic text-slate-800 tracking-tight uppercase">Admin Console</h1>
           <p className="text-emerald-600 text-xs font-bold uppercase tracking-[0.2em] mt-1 italic">University-wide System Overview</p>
         </div>
         <div className="bg-white px-5 py-3 rounded-2xl border border-emerald-100 shadow-sm flex items-center gap-3">
@@ -82,7 +82,7 @@ export default function AdminDashboard() {
             <CardContent className="p-8 flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">{item.title}</p>
-                <h3 className={`text-3xl font-black italic tracking-tighter ${item.color}`}>{item.value || 0}</h3>
+                <h3 className={`text-xl md:text-3xl font-black italic tracking-tighter ${item.color}`}>{item.value || 0}</h3>
               </div>
               <div className={`p-4 rounded-2xl ${item.bg} ${item.color} group-hover:scale-110 transition-transform duration-500 shadow-inner`}>
                 {React.cloneElement(item.icon, { size: 24 })}
@@ -135,9 +135,7 @@ export default function AdminDashboard() {
         )}
       </Card>
 
-      <footer className="pt-10 text-center">
-          <p className="text-slate-300 text-[10px] font-black uppercase tracking-[0.5em] italic">UniTrack Administrative Authority • {new Date().getFullYear()}</p>
-      </footer>
+      
     </div>
   );
 }

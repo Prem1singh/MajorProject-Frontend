@@ -67,7 +67,7 @@ export default function SubjectPerformance() {
       <header className="mb-10">
         <div className="flex items-center gap-3 mb-2">
           <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Teacher Portal</span>
-          <h2 className="text-3xl font-black text-slate-800 tracking-tight">Subject Analytics</h2>
+          <h2 className="text-xl md:text-xl md:text-3xl font-black text-slate-800 tracking-tight">Subject Analytics</h2>
         </div>
         <p className="text-slate-500 font-medium">Analyze class-wide performance and track student rankings.</p>
       </header>
@@ -248,9 +248,9 @@ export default function SubjectPerformance() {
       ) : (
         <div className="bg-white border-2 border-dashed border-emerald-100 rounded-[3rem] py-32 text-center px-4">
           <div className="bg-emerald-50 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6">
-            <FiBarChart2 className="text-emerald-500 text-3xl" />
+            <FiBarChart2 className="text-emerald-500 text-xl md:text-3xl" />
           </div>
-          <h3 className="text-2xl font-bold text-slate-700">Analytics Ready</h3>
+          <h3 className="text-xl md:text-2xl font-bold text-slate-700">Analytics Ready</h3>
           <p className="text-slate-400 mt-2 max-w-sm mx-auto">Please select a subject from your teaching list to generate a performance report.</p>
         </div>
       )}

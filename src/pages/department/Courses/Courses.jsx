@@ -115,7 +115,7 @@ export default function Courses() {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Catalog Admin</span>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight">Academic Courses</h2>
+            <h2 className="text-xl md:text-3xl font-black text-slate-800 tracking-tight">Academic Courses</h2>
           </div>
           <p className="text-slate-500 font-medium italic">Manage all degrees and certificate programs offered.</p>
         </div>
@@ -181,7 +181,7 @@ export default function Courses() {
                   </div>
                 </div>
 
-                <h3 className="text-2xl font-black text-slate-800 mb-2 truncate group-hover:text-emerald-600 transition-colors">
+                <h3 className="text-xl md:text-2xl font-black text-slate-800 mb-2 truncate group-hover:text-emerald-600 transition-colors">
                   {course.name}
                 </h3>
                 
@@ -233,7 +233,7 @@ export default function Courses() {
           <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-300">
             <div className="bg-emerald-600 p-10 text-white flex justify-between items-center relative">
               <div className="relative z-10">
-                <h3 className="text-2xl font-black tracking-tight">{editingCourse ? "Edit Course" : "New Program"}</h3>
+                <h3 className="text-xl md:text-2xl font-black tracking-tight">{editingCourse ? "Edit Course" : "New Program"}</h3>
                 <p className="text-emerald-100 font-medium mt-1 italic">Catalog Update</p>
               </div>
               <FiBook size={60} className="opacity-10 absolute right-10 top-10" />

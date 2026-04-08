@@ -106,7 +106,7 @@ const sorted = [...filtered].sort((a, b) => {
       <div className="bg-emerald-600 p-8 text-white">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h2 className="text-2xl font-black italic tracking-tight flex items-center gap-3 uppercase">
+            <h2 className="text-xl md:text-2xl font-black italic tracking-tight flex items-center gap-3 uppercase">
               <FiEye /> View Class Marks
             </h2>
             <p className="text-emerald-100/80 text-xs font-bold uppercase tracking-widest mt-1">Gradebook & Performance Analytics</p>

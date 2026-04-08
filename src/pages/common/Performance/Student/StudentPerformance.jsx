@@ -97,7 +97,7 @@ export default function StudentPerformance() {
       {/* Header */}
       <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-black text-slate-800 tracking-tight italic">My Performance</h2>
+          <h2 className="text-xl md:text-xl md:text-3xl font-black text-slate-800 tracking-tight italic">My Performance</h2>
           <p className="text-slate-500 font-medium">Academic breakdown for {user?.name}</p>
         </div>
       </header>
@@ -161,7 +161,7 @@ export default function StudentPerformance() {
 function StatCard({ icon, label, value, color, bg }) {
   return (
     <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5">
-      <div className={`${bg} ${color} w-14 h-14 rounded-2xl flex items-center justify-center text-2xl`}>{icon}</div>
+      <div className={`${bg} ${color} w-14 h-14 rounded-2xl flex items-center justify-center text-xl md:text-2xl`}>{icon}</div>
       <div>
         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</p>
         <p className="text-xl font-black text-slate-800">{value}</p>

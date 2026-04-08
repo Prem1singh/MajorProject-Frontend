@@ -125,7 +125,7 @@ export default function AnnouncementsManager() {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Notice Board Admin</span>
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight italic">Announcements</h2>
+            <h2 className=" text-xl md:text-xl md:text-3xl font-black text-slate-800 tracking-tight italic">Announcements</h2>
           </div>
           <p className="text-slate-500 font-medium italic">Broadcast important updates and academic schedules to students.</p>
         </div>
@@ -206,7 +206,7 @@ export default function AnnouncementsManager() {
                   </div>
                 </div>
 
-                <h3 className="text-2xl font-black text-slate-800 mb-2 truncate group-hover:text-emerald-600 transition-colors tracking-tight">{a.title}</h3>
+                <h3 className="text-xl md:text-2xl font-black text-slate-800 mb-2 truncate group-hover:text-emerald-600 transition-colors tracking-tight">{a.title}</h3>
                 <p className="text-emerald-600 font-black text-xs mb-4 flex items-center gap-2 uppercase tracking-widest italic">
                   <FiBook className="shrink-0" /> {a.subject?.name || "General Notice"}
                 </p>
@@ -233,11 +233,11 @@ export default function AnnouncementsManager() {
           <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-300 max-h-[95vh] overflow-y-auto">
             <div className="bg-emerald-600 p-10 text-white flex justify-between items-center relative">
               <div className="relative z-10">
-                <h3 className="text-3xl font-black tracking-tight">{editing ? "Update Broadcast" : "New Announcement"}</h3>
+                <h3 className="text-xl md:text-3xl font-black tracking-tight">{editing ? "Update Broadcast" : "New Announcement"}</h3>
                 <p className="text-emerald-100 font-medium mt-1 italic">Authorized Communication Panel</p>
               </div>
-              <FiBell size={60} className="opacity-10 absolute right-10 top-10" />
-              <button onClick={() => setShowModal(false)} className="absolute top-8 right-8 p-2 hover:bg-emerald-500 rounded-full transition-colors"><FiX size={24} /></button>
+              <FiBell size={50} className="opacity-10 absolute right-10 top-10" />
+              <button onClick={() => setShowModal(false)} className="absolute top-8 right-8 p-2 hover:bg-emerald-500 rounded-full transition-colors z-10"><FiX size={24} /></button>
             </div>
             
             <form onSubmit={handleSubmit} className="p-10 space-y-6">

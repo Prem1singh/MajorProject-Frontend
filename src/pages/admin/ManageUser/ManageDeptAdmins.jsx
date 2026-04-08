@@ -150,71 +150,79 @@ export default function ManageDeptAdmin() {
 
       {error && <div className="bg-rose-50 text-rose-500 p-4 rounded-2xl border border-rose-100 text-center font-bold text-xs uppercase tracking-widest">{error}</div>}
 
-      {/* --- Data Table --- */}
-      <div className="relative">
-        {loading ? (
-          <div className="py-20 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-600 border-t-transparent mx-auto"></div>
-            <p className="mt-4 text-emerald-500 font-black italic text-xs uppercase">Syncing Authority Nodes...</p>
-          </div>
-        ) : filteredAdmins.length === 0 ? (
-          <div className="py-24 text-center border-4 border-dashed border-slate-50 rounded-[3rem]">
-            <FiUser className="mx-auto text-slate-100 text-7xl mb-4" />
-            <p className="text-slate-300 font-black italic uppercase text-sm">No Administrators Found</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto rounded-[2.5rem] border border-slate-100 shadow-sm bg-white">
-            <table className="w-full border-collapse min-w-[800px]">
-              <thead>
-                <tr className="bg-emerald-50/50 border-b border-emerald-100">
-                  <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest">Admin Identity</th>
-                  <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest">Official Email</th>
-                  <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest">Dept. Domain</th>
-                  <th className="py-6 px-8 text-center text-[10px] font-black uppercase text-emerald-700 tracking-widest">Privileges</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-emerald-50">
-                {filteredAdmins.map((a, idx) => (
-                  <tr key={a._id} className="hover:bg-emerald-50/20 transition-all group">
-                    <td className="py-6 px-8">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600 font-black text-xs uppercase shadow-inner">
-                            {a.name.charAt(0)}
-                        </div>
-                        <span className="font-bold text-slate-700">{a.name}</span>
-                      </div>
-                    </td>
-                    <td className="py-6 px-8 text-sm font-medium text-slate-500">
-                      <div className="flex items-center gap-2 italic">
-                        <FiMail className="text-emerald-400" /> {a.email}
-                      </div>
-                    </td>
-                    <td className="py-6 px-8">
-                       <span className="bg-slate-100 px-4 py-1.5 rounded-lg text-[10px] font-black text-slate-500 uppercase tracking-widest border border-slate-200">
-                          {a?.department?.name || "UNASSIGNED"}
-                       </span>
-                    </td>
-                    <td className="py-6 px-8">
-                      <div className="flex items-center justify-center gap-3">
-                        <button onClick={() => handleEdit(a)} className="p-2.5 bg-white border border-slate-100 rounded-xl text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all shadow-sm">
-                          <FiEdit3 size={16} />
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(a._id)} 
-                          disabled={deleteLoading === a._id}
-                          className="p-2.5 bg-white border border-slate-100 rounded-xl text-rose-400 hover:bg-rose-500 hover:text-white transition-all shadow-sm disabled:opacity-30"
-                        >
-                          <FiTrash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+     {/* --- Data Table --- */}
+<div className="relative">
+  {loading ? (
+    <div className="py-20 text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-600 border-t-transparent mx-auto"></div>
+      <p className="mt-4 text-emerald-500 font-black italic text-xs uppercase">Syncing Authority Nodes...</p>
+    </div>
+  ) : filteredAdmins.length === 0 ? (
+    <div className="py-24 text-center border-4 border-dashed border-slate-50 rounded-[3rem]">
+      <FiUser className="mx-auto text-slate-100 text-7xl mb-4" />
+      <p className="text-slate-300 font-black italic uppercase text-sm">No Administrators Found</p>
+    </div>
+  ) : (
+    <div className="overflow-x-auto rounded-[2.5rem] border border-slate-100 shadow-sm bg-white">
+      {/* min-w ensures scroll on mobile, preventing column squeeze */}
+      <table className="w-full border-collapse min-w-[900px]">
+        <thead>
+          <tr className="bg-emerald-50/50 border-b border-emerald-100">
+            <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest whitespace-nowrap">Admin Identity</th>
+            <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest whitespace-nowrap">Official Email</th>
+            <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest whitespace-nowrap">Dept. Domain</th>
+            <th className="py-6 px-8 text-center text-[10px] font-black uppercase text-emerald-700 tracking-widest whitespace-nowrap">Privileges</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-emerald-50">
+          {filteredAdmins.map((a) => (
+            <tr key={a._id} className="hover:bg-emerald-50/20 transition-all group">
+              {/* Identity Cell */}
+              <td className="py-6 px-8 whitespace-nowrap">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600 font-black text-xs uppercase shadow-inner shrink-0">
+                      {a.name.charAt(0)}
+                  </div>
+                  <span className="font-bold text-slate-700">{a.name}</span>
+                </div>
+              </td>
+
+              {/* Email Cell */}
+              <td className="py-6 px-8 whitespace-nowrap">
+                <div className="flex items-center gap-2 text-sm font-medium text-slate-500 italic">
+                  <FiMail className="text-emerald-400 shrink-0" /> {a.email}
+                </div>
+              </td>
+
+              {/* Department Cell */}
+              <td className="py-6 px-8 whitespace-nowrap">
+                 <span className="inline-block bg-slate-100 px-4 py-1.5 rounded-lg text-[10px] font-black text-slate-500 uppercase tracking-widest border border-slate-200">
+                    {a?.department?.name || "UNASSIGNED"}
+                 </span>
+              </td>
+
+              {/* Action Buttons */}
+              <td className="py-6 px-8 whitespace-nowrap">
+                <div className="flex items-center justify-center gap-3">
+                  <button onClick={() => handleEdit(a)} className="p-2.5 bg-white border border-slate-100 rounded-xl text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all shadow-sm">
+                    <FiEdit3 size={16} />
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(a._id)} 
+                    disabled={deleteLoading === a._id}
+                    className="p-2.5 bg-white border border-slate-100 rounded-xl text-rose-400 hover:bg-rose-500 hover:text-white transition-all shadow-sm disabled:opacity-30"
+                  >
+                    <FiTrash2 size={16} />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</div>
 
       {/* --- FORM MODAL (Popup) --- */}
       {showForm && (
