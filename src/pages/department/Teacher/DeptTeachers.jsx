@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { 
   FiPlus, FiSearch, FiEdit3, FiTrash2, FiUser, 
-  FiMail, FiHash, FiX, FiChevronLeft, FiChevronRight, FiFilter 
+  FiMail, FiHash, FiX, FiChevronLeft, FiChevronRight, FiFilter, FiList 
 } from "react-icons/fi";
 
 export default function Teachers() {
@@ -19,7 +19,7 @@ export default function Teachers() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const [page, setPage] = useState(1);
-  const teachersPerPage = 8;
+  const [teachersPerPage, setTeachersPerPage] = useState(10);
   const [sortOrder, setSortOrder] = useState("asc");
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -32,9 +32,9 @@ export default function Teachers() {
 
   const fetchTeachers = async () => {
     try {
+      setLoading(true);
       const res = await api.get("/departmentAdmin/teachers");
-      let data = res.data || [];
-      setTeachers(data);
+      setTeachers(res.data || []);
     } catch (err) {
       toast.error("Failed to fetch faculty records");
     } finally {
@@ -95,7 +95,11 @@ export default function Teachers() {
     }
   };
 
-  // Filter & Sort Logic
+  const handleRecordsChange = (e) => {
+    setTeachersPerPage(Number(e.target.value));
+    setPage(1); 
+  };
+
   const filteredAndSorted = useMemo(() => {
     let result = teachers.filter((t) => {
       const search = searchTerm.toLowerCase();
@@ -115,50 +119,68 @@ export default function Teachers() {
     });
   }, [teachers, searchTerm, sortOrder]);
 
-  const totalPages = Math.ceil(filteredAndSorted.length / teachersPerPage);
+  const totalPages = Math.ceil(filteredAndSorted.length / teachersPerPage) || 1;
   const currentTeachers = filteredAndSorted.slice((page - 1) * teachersPerPage, page * teachersPerPage);
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-10 min-h-screen bg-[#f8fafc]">
       
-      {/* Header Section */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-emerald-50">
+      {/* --- Header Area --- */}
+      <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-emerald-50">
         <div>
           <div className="flex items-center gap-3 mb-2">
             <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Faculty Admin</span>
             <h2 className="text-xl md:text-3xl font-black text-slate-800 tracking-tight">Teacher Directory</h2>
           </div>
-          <p className="text-slate-500 font-medium italic">Manage department faculty, credentials, and access.</p>
+          <p className="text-slate-500 font-medium italic">Manage department faculty and access control.</p>
         </div>
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-2xl transition-all shadow-xl shadow-emerald-100 active:scale-95 font-bold whitespace-nowrap"
+          className="flex items-center justify-center gap-2 bg-slate-900 text-white px-8 py-4 rounded-2xl transition-all shadow-xl hover:bg-emerald-600 active:scale-95 font-bold whitespace-nowrap"
         >
           <FiPlus strokeWidth={3} /> Add Faculty
         </button>
       </header>
 
-      {/* Control Bar */}
-      <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 mb-8 flex flex-col lg:flex-row gap-4 items-center">
-        <div className="relative flex-grow w-full">
-          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+      {/* --- Control Bar (Search & Row Count) --- */}
+      <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100 mb-8 flex flex-col lg:flex-row gap-4 items-center">
+        <div className="relative flex-grow w-full group">
+          <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
           <input
             type="text"
             placeholder="Search by name, email or employee ID..."
             value={searchTerm}
             onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
-            className="w-full pl-10 pr-4 py-3 bg-slate-50 border-transparent rounded-xl font-bold text-slate-600 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
+            className="w-full pl-10 pr-4 py-3.5 bg-white border-2 border-slate-100 rounded-xl font-bold text-slate-600 focus:border-emerald-500 transition-all outline-none shadow-sm"
           />
         </div>
-        <button
-          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-          className="w-full lg:w-auto px-6 py-3 bg-white border-2 border-slate-100 text-slate-600 font-bold rounded-xl hover:border-emerald-500 hover:text-emerald-600 transition-all flex items-center justify-center gap-2"
-        >
-          <FiFilter className="text-emerald-500" /> Employee ID: {sortOrder === "asc" ? "Asc" : "Desc"}
-        </button>
+
+        <div className="flex gap-4 w-full lg:w-auto">
+          <div className="flex items-center gap-3 bg-white border-2 border-slate-100 rounded-xl px-4 py-3 shadow-sm">
+            <FiList className="text-slate-400" />
+            <span className="text-[10px] font-black text-slate-400 uppercase">Show:</span>
+            <select 
+              value={teachersPerPage}
+              onChange={handleRecordsChange}
+              className="bg-transparent font-bold text-slate-700 outline-none cursor-pointer text-sm"
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
+
+          <button
+            onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+            className="flex-grow lg:flex-grow-0 px-6 py-3 bg-white border-2 border-slate-100 text-slate-600 font-bold rounded-xl hover:border-emerald-500 hover:text-emerald-600 transition-all flex items-center justify-center gap-2 shadow-sm"
+          >
+            <FiFilter className="text-emerald-500" /> ID: {sortOrder === "asc" ? "Asc" : "Desc"}
+          </button>
+        </div>
       </div>
 
-      {/* Teachers Grid/Table */}
+      {/* --- Faculty Table --- */}
       <div className="bg-white rounded-[2.5rem] border border-emerald-50 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -171,10 +193,10 @@ export default function Teachers() {
             </thead>
             <tbody className="divide-y divide-slate-50">
               {loading ? (
-                <tr><td colSpan="3" className="p-20 text-center animate-pulse text-slate-400 font-bold italic">Syncing directory...</td></tr>
+                <tr><td colSpan="3" className="p-20 text-center animate-pulse text-slate-400 font-bold italic text-xs uppercase tracking-widest">Syncing directory...</td></tr>
               ) : currentTeachers.length > 0 ? (
                 currentTeachers.map((t) => (
-                  <tr key={t._id} className="hover:bg-emerald-50/30 transition-colors group">
+                  <tr key={t._id} className="hover:bg-emerald-50/20 transition-colors group">
                     <td className="p-6">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold shadow-inner">
@@ -217,21 +239,24 @@ export default function Teachers() {
           </table>
         </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="p-8 bg-slate-50/50 border-t border-slate-50 flex items-center justify-center gap-4">
+        {/* --- Pagination --- */}
+        <div className="p-8 bg-slate-50/50 border-t border-slate-50 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
+            Showing <span className="text-emerald-600">{(page - 1) * teachersPerPage + 1} - {Math.min(page * teachersPerPage, filteredAndSorted.length)}</span> of {filteredAndSorted.length} Faculty
+          </p>
+          <div className="flex items-center gap-4">
             <button disabled={page === 1} onClick={() => setPage(page - 1)} className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-emerald-600 disabled:opacity-30 transition-all shadow-sm">
               <FiChevronLeft size={20} />
             </button>
-            <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Page {page} of {totalPages}</span>
+            <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Page {page} / {totalPages}</span>
             <button disabled={page === totalPages} onClick={() => setPage(page + 1)} className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-emerald-600 disabled:opacity-30 transition-all shadow-sm">
               <FiChevronRight size={20} />
             </button>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Add/Edit Modal (Unified Theme) */}
+      {/* --- Add/Edit Modal --- */}
       {(isAddModalOpen || isEditModalOpen) && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
           <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-300">
@@ -256,7 +281,7 @@ export default function Teachers() {
                   type="text"
                   value={isEditModalOpen ? selectedTeacher.name : addFormData.name}
                   onChange={(e) => isEditModalOpen ? setSelectedTeacher({...selectedTeacher, name: e.target.value}) : setAddFormData({...addFormData, name: e.target.value})}
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 focus:border-emerald-500 focus:bg-white outline-none font-bold text-slate-700 transition-all"
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 focus:border-emerald-500 focus:bg-white outline-none font-bold text-slate-700 transition-all shadow-inner"
                   placeholder="e.g. Dr. Satish Sharma"
                   required
                 />
@@ -268,7 +293,7 @@ export default function Teachers() {
                   type="email"
                   value={isEditModalOpen ? selectedTeacher.email : addFormData.email}
                   onChange={(e) => isEditModalOpen ? setSelectedTeacher({...selectedTeacher, email: e.target.value}) : setAddFormData({...addFormData, email: e.target.value})}
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 focus:border-emerald-500 focus:bg-white outline-none font-bold text-slate-700 transition-all"
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 focus:border-emerald-500 focus:bg-white outline-none font-bold text-slate-700 transition-all shadow-inner"
                   placeholder="name@university.edu"
                   required
                 />
@@ -280,7 +305,7 @@ export default function Teachers() {
                   type="text"
                   value={isEditModalOpen ? selectedTeacher.employeeId : addFormData.employeeId}
                   onChange={(e) => isEditModalOpen ? setSelectedTeacher({...selectedTeacher, employeeId: e.target.value}) : setAddFormData({...addFormData, employeeId: e.target.value})}
-                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 focus:border-emerald-500 focus:bg-white outline-none font-bold text-slate-700 transition-all"
+                  className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 focus:border-emerald-500 focus:bg-white outline-none font-bold text-slate-700 transition-all shadow-inner"
                   placeholder="EMP-101"
                   required
                 />
@@ -293,7 +318,7 @@ export default function Teachers() {
                     type="password"
                     value={addFormData.password}
                     onChange={(e) => setAddFormData({...addFormData, password: e.target.value})}
-                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 focus:border-emerald-500 focus:bg-white outline-none font-bold text-slate-700 transition-all"
+                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 focus:border-emerald-500 focus:bg-white outline-none font-bold text-slate-700 transition-all shadow-inner"
                     placeholder="••••••••"
                     required
                   />

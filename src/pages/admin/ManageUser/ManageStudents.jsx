@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../../../utils/axiosInstance";
 import { 
   FiUser, FiMail, FiHash, FiAward, FiFileText, 
-  FiSearch, FiFilter, FiChevronLeft, FiChevronRight, FiCheckCircle 
+  FiSearch, FiFilter, FiChevronLeft, FiChevronRight, FiList 
 } from "react-icons/fi";
 
 export default function ManageStudents() {
@@ -19,7 +19,9 @@ export default function ManageStudents() {
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const studentsPerPage = 10;
+  
+  // Updated: Changed to state to allow user selection
+  const [studentsPerPage, setStudentsPerPage] = useState(10);
 
   // 1. Fetch Departments
   useEffect(() => {
@@ -79,7 +81,13 @@ export default function ManageStudents() {
   const indexOfLast = currentPage * studentsPerPage;
   const indexOfFirst = indexOfLast - studentsPerPage;
   const currentStudents = filteredStudents.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
+  const totalPages = Math.ceil(filteredStudents.length / studentsPerPage) || 1;
+
+  // Handle change for entries per page
+  const handleEntriesChange = (e) => {
+    setStudentsPerPage(Number(e.target.value));
+    setCurrentPage(1); // Reset to first page when changing view size
+  };
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700">
@@ -130,16 +138,33 @@ export default function ManageStudents() {
           </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative group">
-          <FiSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
-          <input
-            type="text"
-            placeholder="Quick search by name, email or roll number..."
-            value={searchTerm}
-            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-            className="w-full bg-white border-2 border-slate-100 rounded-2xl py-4 pl-14 pr-6 font-bold text-slate-700 outline-none focus:border-emerald-500 shadow-sm"
-          />
+        {/* Search and Entries Control */}
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="relative group flex-grow">
+            <FiSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
+            <input
+              type="text"
+              placeholder="Quick search by name, email or roll number..."
+              value={searchTerm}
+              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+              className="w-full bg-white border-2 border-slate-100 rounded-2xl py-4 pl-14 pr-6 font-bold text-slate-700 outline-none focus:border-emerald-500 shadow-sm"
+            />
+          </div>
+          
+          <div className="flex items-center gap-3 bg-white border-2 border-slate-100 rounded-2xl px-4 shadow-sm min-w-[180px]">
+            <FiList className="text-slate-400" />
+            <span className="text-[10px] font-black text-slate-400 uppercase">Show:</span>
+            <select 
+              value={studentsPerPage} 
+              onChange={handleEntriesChange}
+              className="bg-transparent font-bold text-slate-700 outline-none cursor-pointer"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -174,7 +199,7 @@ export default function ManageStudents() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-emerald-50">
-                  {currentStudents.map((s, idx) => (
+                  {currentStudents.map((s) => (
                     <tr key={s._id} className="hover:bg-emerald-50/20 transition-all group">
                       <td className="py-6 px-8">
                         <p className="font-bold text-slate-700">{s.name}</p>

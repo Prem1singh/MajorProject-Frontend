@@ -3,7 +3,7 @@ import api from "../../../utils/axiosInstance";
 import { toast } from "react-toastify";
 import { 
   FiLayers, FiPlus, FiSearch, FiEdit3, FiTrash2, 
-  FiX, FiSave, FiChevronLeft, FiChevronRight, FiActivity 
+  FiX, FiSave, FiChevronLeft, FiChevronRight, FiActivity, FiList 
 } from "react-icons/fi";
 
 export default function ManageDepartments() {
@@ -19,7 +19,7 @@ export default function ManageDepartments() {
   // State for deletions & UI
   const [deletingId, setDeletingId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
 
   const fetchDepartments = async () => {
@@ -94,45 +94,67 @@ export default function ManageDepartments() {
     );
   });
 
+  const handleItemsPerPageChange = (e) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1);
+  };
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentDepartments = filteredDepartments.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredDepartments.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredDepartments.length / itemsPerPage) || 1;
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-10 space-y-10 animate-in fade-in duration-700">
+    <div className="max-w-7xl mx-auto p-4 sm:p-10 space-y-8 animate-in fade-in duration-700">
       
-      {/* --- Page Header --- */}
+      {/* --- Header Section (Emerald Theme) --- */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-white p-8 rounded-[2.5rem] border border-emerald-50 shadow-sm">
         <div>
-          <h2 className="text-xl md:text-xl md:text-3xl font-black italic text-slate-800 tracking-tighter uppercase leading-none flex items-center gap-3">
+          <h2 className="text-xl md:text-3xl font-black italic text-slate-800 tracking-tighter uppercase leading-none flex items-center gap-3">
              <FiLayers className="text-emerald-500" /> Departments
           </h2>
           <p className="text-emerald-600 text-[10px] font-black uppercase tracking-[0.3em] mt-2 italic">Institutional Hierarchy Management</p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="relative group">
-            <FiSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
-            <input
-              type="text"
-              placeholder="Search nodes..."
-              value={searchTerm}
-              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-              className="bg-slate-50 border-2 border-slate-50 rounded-2xl py-3 pl-12 pr-6 font-bold text-slate-700 outline-none focus:bg-white focus:border-emerald-500 transition-all w-64 shadow-inner"
-            />
-          </div>
-          <button
-            onClick={() => { setShowForm(true); setEditingId(null); setForm({ name: "", code: "" }); }}
-            className="bg-slate-900 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-slate-100 flex items-center gap-2 active:scale-95"
+        <button
+          onClick={() => { setShowForm(true); setEditingId(null); setForm({ name: "", code: "" }); }}
+          className="bg-slate-900 text-white px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-100 flex items-center gap-2 active:scale-95"
+        >
+          <FiPlus size={18} /> Provision Dept
+        </button>
+      </div>
+
+      {/* --- Filter & Table Controls Grouped Together --- */}
+      <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100 flex flex-col lg:flex-row gap-4">
+        <div className="relative flex-grow group">
+          <FiSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
+          <input
+            type="text"
+            placeholder="Quick search nodes..."
+            value={searchTerm}
+            onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+            className="w-full bg-white border-2 border-slate-100 rounded-2xl py-3.5 pl-14 pr-6 font-bold text-slate-700 outline-none focus:border-emerald-500 transition-all shadow-sm"
+          />
+        </div>
+
+        <div className="flex items-center gap-3 bg-white border-2 border-slate-100 rounded-2xl px-6 py-3.5 shadow-sm min-w-[180px]">
+          <FiList className="text-slate-400" />
+          <span className="text-[10px] font-black text-slate-400 uppercase">Show:</span>
+          <select 
+            value={itemsPerPage}
+            onChange={handleItemsPerPageChange}
+            className="bg-transparent font-bold text-slate-700 outline-none cursor-pointer text-sm"
           >
-            <FiPlus size={18} /> Provision Dept
-          </button>
+            <option value={5}>05 Rows</option>
+            <option value={10}>10 Rows</option>
+            <option value={25}>25 Rows</option>
+            <option value={50}>50 Rows</option>
+          </select>
         </div>
       </div>
 
       {/* --- Data Table --- */}
-      <div className="bg-white rounded-[3rem] shadow-2xl shadow-emerald-100/20 border border-emerald-50 overflow-hidden">
+      <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-emerald-100/20 border border-emerald-50 overflow-hidden">
         {loading ? (
           <div className="py-24 text-center">
              <div className="animate-spin rounded-full h-12 w-12 border-4 border-emerald-600 border-t-transparent mx-auto"></div>
@@ -148,7 +170,7 @@ export default function ManageDepartments() {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-emerald-50/50 border-b border-emerald-100">
-                  <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest w-20">ID</th>
+                  <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest w-20">Rank</th>
                   <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest">Department Architecture</th>
                   <th className="py-6 px-8 text-left text-[10px] font-black uppercase text-emerald-700 tracking-widest">System Code</th>
                   <th className="py-6 px-8 text-center text-[10px] font-black uppercase text-emerald-700 tracking-widest">Operations</th>
@@ -191,25 +213,25 @@ export default function ManageDepartments() {
             {/* Pagination */}
             <div className="flex flex-col md:flex-row justify-between items-center px-8 py-8 gap-4 border-t border-slate-50 bg-slate-50/30">
               <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredDepartments.length)} of {filteredDepartments.length} nodes
+                Nodes <span className="text-emerald-600">{indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredDepartments.length)}</span> of {filteredDepartments.length}
               </p>
               <div className="flex gap-2">
                 <button 
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage(p => p - 1)}
-                  className="px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-emerald-600 disabled:opacity-20 transition-all"
+                  className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-emerald-600 disabled:opacity-20 transition-all shadow-sm"
                 >
-                  Prev
+                  <FiChevronLeft size={18} />
                 </button>
-                <div className="px-6 py-2.5 bg-slate-900 rounded-xl text-[10px] font-black text-white italic">
+                <div className="flex items-center px-6 bg-slate-900 rounded-xl text-[10px] font-black text-white italic">
                    {currentPage} / {totalPages}
                 </div>
                 <button 
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage(p => p + 1)}
-                  className="px-6 py-2.5 bg-white border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-emerald-600 disabled:opacity-20 transition-all"
+                  className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-emerald-600 disabled:opacity-20 transition-all shadow-sm"
                 >
-                  Next
+                  <FiChevronRight size={18} />
                 </button>
               </div>
             </div>
@@ -217,7 +239,7 @@ export default function ManageDepartments() {
         )}
       </div>
 
-      {/* --- FORM MODAL --- */}
+      {/* --- FORM MODAL (Popup) --- */}
       {showForm && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-in fade-in" onClick={() => setShowForm(false)}></div>
@@ -228,7 +250,7 @@ export default function ManageDepartments() {
                   <FiLayers /> {editingId ? "Update Hierarchy" : "New Node Provision"}
                 </h3>
               </div>
-              <button onClick={() => setShowForm(false)} className="hover:rotate-90 transition-all"><FiX size={24}/></button>
+              <button onClick={() => setShowForm(false)} className="hover:rotate-90 transition-all p-2"><FiX size={24}/></button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-10 space-y-6">
@@ -267,8 +289,6 @@ export default function ManageDepartments() {
           </div>
         </div>
       )}
-
-     
     </div>
   );
 }
