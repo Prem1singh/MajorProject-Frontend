@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { 
   FiPlus, FiSearch, FiEdit3, FiTrash2, FiFileText, 
   FiUsers, FiCalendar, FiCheckCircle, FiXCircle, 
-  FiDownload, FiArrowLeft, FiFilter, FiAward, FiX 
+  FiDownload, FiArrowLeft, FiFilter, FiAward, FiX, FiExternalLink 
 } from "react-icons/fi";
 
 export default function TeacherAssignments() {
@@ -81,7 +81,7 @@ export default function TeacherAssignments() {
     try {
       const fd = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
-        if (value) fd.append(key, value);
+        if (value !== null) fd.append(key, value);
       });
 
       if (editingAssignment) {
@@ -163,7 +163,7 @@ export default function TeacherAssignments() {
             <div className="bg-emerald-600 p-2.5 rounded-2xl text-white shadow-xl shadow-emerald-100">
               <FiAward size={24} />
             </div>
-            <h2 className="text-xl md:text-xl md:text-3xl font-black text-slate-800 tracking-tight italic">Assignment Console</h2>
+            <h2 className="text-xl md:text-3xl font-black text-slate-800 tracking-tight italic">Assignment Console</h2>
           </div>
           <p className="text-slate-500 font-medium italic">Create academic tasks and evaluate student performance.</p>
         </div>
@@ -177,7 +177,7 @@ export default function TeacherAssignments() {
         )}
       </header>
 
-      {/* Control Bar (Only show in Main View) */}
+      {/* Control Bar */}
       {!viewingSubmissions && (
         <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-emerald-50 mb-10 flex flex-col xl:flex-row gap-4 items-center">
             <div className="relative flex-grow w-full">
@@ -223,6 +223,18 @@ export default function TeacherAssignments() {
                       <FiFileText size={24} />
                     </div>
                     <div className="flex gap-1">
+                      {/* DOWNLOAD OPTION FOR TEACHER */}
+                      {assignment.fileUrl && (
+                        <a 
+                          href={assignment.fileUrl} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          title="Download Reference"
+                          className="p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                        >
+                          <FiDownload size={18} />
+                        </a>
+                      )}
                       <button onClick={() => openModal(assignment)} className="p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"><FiEdit3 size={18} /></button>
                       <button onClick={() => handleDelete(assignment._id)} className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"><FiTrash2 size={18} /></button>
                     </div>
@@ -270,7 +282,7 @@ export default function TeacherAssignments() {
             <div className="flex items-center gap-4">
                <div className="bg-emerald-50 p-4 rounded-2xl text-emerald-600 font-black italic">GRADING</div>
                <div>
-                  <h3 className="text-xl md:text-xl md:text-2xl font-black text-slate-800 tracking-tight">{selectedAssignment.title}</h3>
+                  <h3 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">{selectedAssignment.title}</h3>
                   <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">{selectedAssignment.subject?.name}</p>
                </div>
             </div>
@@ -295,7 +307,7 @@ export default function TeacherAssignments() {
                   
                   <div className="md:col-span-1 flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 font-bold overflow-hidden">
-                       {s.student?.profilePicture ? <img src={s.student.profilePicture} className="w-full h-full object-cover" /> : s.student?.name?.charAt(0)}
+                       {s.student?.profilePicture ? <img src={s.student.profilePicture} className="w-full h-full object-cover" alt="" /> : s.student?.name?.charAt(0)}
                     </div>
                     <div>
                         <h4 className="font-black text-slate-800 leading-tight truncate">{s.student?.name || "N/A"}</h4>
@@ -311,7 +323,7 @@ export default function TeacherAssignments() {
                       {s.status || "pending"}
                     </span>
                     <a href={s.fileUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-[10px] font-black text-emerald-600 hover:underline uppercase">
-                        <FiDownload /> Review File
+                        <FiDownload /> Review Student Work
                     </a>
                   </div>
 
@@ -404,6 +416,16 @@ export default function TeacherAssignments() {
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Reference File</label>
                 <input type="file" onChange={(e) => setFormData({ ...formData, file: e.target.files[0], existingFileUrl: null })} className="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
+                
+                {/* MODAL DOWNLOAD LINK */}
+                {formData.existingFileUrl && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <FiDownload className="text-emerald-600" size={12} />
+                    <a href={formData.existingFileUrl} target="_blank" rel="noreferrer" className="text-[10px] font-black text-emerald-600 hover:underline uppercase">
+                      Download Current Attachment
+                    </a>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-4 pt-4">
